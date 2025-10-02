@@ -1,0 +1,21 @@
+[project]
+name = "agents-lg-emergency-assistant"
+version = "0.1.0"
+description = "An agent system for decission making in emergency scenarios using LangGraph."
+authors = [
+    { name = "Pablo Martínez Agulló", email = "pablo.martinez.agullo@gmail.com" }
+]
+license = { text = "GNU General Public License (GPL) 3.0" }
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.2.0",
+    "langchain>=0.3.0",
+    "langchain-openai>=0.2.0",  # o langchain-anthropic
+    "langsmith>=0.1.0",
+    "gradio>=4.0.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "httpx>=0.27.0",  # Para Pushover
+    "langgraph-checkpoint-sqlite>=0.1.0",  # Para SQLite checkpoints
+]
