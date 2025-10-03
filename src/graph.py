@@ -45,9 +45,9 @@ def create_emergency_graph() -> StateGraph:
         "evaluator",
         should_retry_plan,
         {
-            "approved": "notifier",
-            "needs_improvement": "proposer",  # Loop back for retry
-            "max_retries_reached": "notifier"  # Or END if preferred
+            "approved": "notifier",             # OK
+            "needs_improvement": "proposer",    # Not OK, improve
+            "max_retries_reached": "notifier"   # Not OK, but stop trying
         }
     )
     

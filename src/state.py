@@ -1,5 +1,5 @@
 from typing import TypedDict, List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 """
 Defines the data structure of the emergency assistant project.
@@ -14,6 +14,8 @@ class Asset(BaseModel):
     type: str
     location: dict
     description: str
+    comments: Optional[str] = Field(default=None, description="Additional context about vulnerability or special conditions")
+
 
 class Danger(BaseModel):
     """
@@ -23,6 +25,9 @@ class Danger(BaseModel):
     type: str
     location: dict
     description: str
+    comments: Optional[str] = Field(default=None, description="Additional threat context or evolution details")
+    severity: Optional[str] = Field(default=None, description="Threat intensity: low, medium, or high")
+
 
 class RiskAssessment(BaseModel):
     """
@@ -35,15 +40,17 @@ class RiskAssessment(BaseModel):
     distance_km: float
     risk_level: str  # "high", "medium", "low"
 
+
 class EvacuationPlan(BaseModel):
     """
     This is the core output of your planning agent. 
     It's a structured format for the final plan. 
     """
     assets_to_evacuate: List[str]
-    helpers: List[str]          # Actors assigned to assis
+    helpers: List[str]          # Actors assigned to assist
     plan_quality_score: float   # For self-evaluation
     reasoning: str
+
 
 class GraphState(TypedDict):
     """
@@ -68,5 +75,3 @@ class GraphState(TypedDict):
     final_plan: Optional[EvacuationPlan]
     notifications_sent: bool
     error: Optional[str]
-
-# Note: For larger projects, the Graph state and the Pydantic models are in separated files

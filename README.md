@@ -44,8 +44,6 @@ Proposed project scaffolding
 ├── data
 │   └── actors.json
 ├── main.py
-├── prompts
-│   └── prompts.yaml
 ├── pyproject.toml
 └── src
     ├── graph.py
