@@ -18,4 +18,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "httpx>=0.27.0",  # Para Pushover
     "langgraph-checkpoint-sqlite>=0.1.0",  # Para SQLite checkpoints
+    "pygraphviz>=1.11",  # For graph visualization
+    #"grandalf>=0.7",     # Alternative for visualization if pygraphviz has issues
+
 ]

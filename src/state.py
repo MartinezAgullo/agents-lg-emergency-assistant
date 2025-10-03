@@ -4,7 +4,6 @@ from pydantic import BaseModel
 """
 Defines the data structure of the emergency assistant project.
 It has pydantic models and the TypedDict for the graph state. 
-
 """
 
 class Asset(BaseModel):
@@ -69,3 +68,5 @@ class GraphState(TypedDict):
     final_plan: Optional[EvacuationPlan]
     notifications_sent: bool
     error: Optional[str]
+
+# Note: For larger projects, the Graph state and the Pydantic models are in separated files

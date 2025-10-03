@@ -14,7 +14,7 @@ Emergency Assistant analyzes threats (fires, storms, terrorist attacks) and auto
 - 📲 **Push Notifications**: Real-time alerts via Pushover
 - 💾 **Persistent Checkpoints**: SQLite-based state management for reliability
 - 📊 **Full Observability**: Integrated LangSmith tracing
-- 🎨 **Interactive UI**: Gradio interface with map visualization
+<!-- - 🎨 **Interactive UI**: Gradio interface with map visualization -->
 
 ## 🏗️ Architecture
 
@@ -37,21 +37,28 @@ uv run python src/main.py
 ```
 
 ## 📁 Project Structure
-
+Proposed project scaffolding
 ```
 /emergency_assistant
-├── /src
-│   ├── main.py           # Gradio entry point
-│   ├── graph.py          # LangGraph definition
-│   ├── /nodes            # Agent nodes (parser, analyzer, proposer, evaluator, notifier)
-│   ├── tools.py          # Pushover, distance calculator, etc.
-│   ├── state.py          # State schema
-│   └── models.py         # Pydantic models
-├── /data
-│   └── actors.json       # Assets and dangers input
-├── /checkpoints          # SQLite persistence
-└── /prompts
-    └── prompts.yaml      # System prompts
+├── checkpoints
+├── data
+│   └── actors.json
+├── main.py
+├── prompts
+│   └── prompts.yaml
+├── pyproject.toml
+└── src
+    ├── graph.py
+    ├── main.py
+    ├── nodes
+    │   ├── analyzer.py
+    │   ├── evaluator.py
+    │   ├── notifier.py
+    │   ├── parser.py
+    │   └── proposer.py
+    ├── state.py
+    ├── tools.py
+    └── utils.py
 ```
 
 ## 📝 License

@@ -5,6 +5,7 @@
 venv/
 env/
 .venv
+uv.lock
 
 # Ignore Python bytecode
 __pycache__/
