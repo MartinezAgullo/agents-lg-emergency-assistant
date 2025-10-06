@@ -2,6 +2,8 @@
 
 from typing import Dict, Any
 from ..state import GraphState, Asset, Danger
+from ..firewall import validate_input
+
 
 
 def parse_input(state: GraphState) -> Dict[str, Any]:
@@ -10,7 +12,19 @@ def parse_input(state: GraphState) -> Dict[str, Any]:
     Converts raw JSON data into structured Pydantic models for downstream processing.
     """
     raw_input = state["raw_input"]
+
+    # Step 1: Security validation with AI firewall
+    is_valid, error_message, sanitized_data = validate_input(raw_input)
+
+    if not is_valid:
+        # Firewall blocked the input
+        return {
+            "assets": [],
+            "dangers": [],
+            "error": error_message
+        }
     
+    # Step 2: Parse validated data into Pydantic models
     try:
         # Parse assets
         assets = [Asset(**asset_data) for asset_data in raw_input.get("assets", [])]

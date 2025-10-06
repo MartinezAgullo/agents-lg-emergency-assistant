@@ -11,9 +11,10 @@ Emergency Assistant analyzes threats (fires, storms, terrorist attacks) and auto
 - 🤖 **Multi-Agent Architecture**: Parser → Analyzer → Proposer → Evaluator workflow
 - 📍 **Geospatial Risk Assessment**: Calculates threat proximity and risk levels for each asset
 - 🔄 **Self-Improving Plans**: Iterative plan refinement until quality threshold is met
-- 📲 **Push Notifications**: Real-time alerts via Pushover
+- 📲 **Push Notifications**: Real-time alerts via [Pushover](https://pushover.net/)
 - 💾 **Persistent Checkpoints**: SQLite-based state management for reliability
 - 📊 **Full Observability**: Integrated LangSmith tracing
+- 🧱 **LLM Injection Firewall**: Protects against malicious external promptss
 <!-- - 🎨 **Interactive UI**: Gradio interface with map visualization -->
 
 ## 🏗️ Architecture
@@ -46,21 +47,22 @@ Proposed project scaffolding
 /emergency_assistant
 ├── checkpoints
 ├── data
-│   └── actors.json
+│   └── actors.json
 ├── main.py
 ├── pyproject.toml
-└── src
-    ├── graph.py
-    ├── main.py
-    ├── nodes
-    │   ├── analyzer.py
-    │   ├── evaluator.py
-    │   ├── notifier.py
-    │   ├── parser.py
-    │   └── proposer.py
-    ├── state.py
-    ├── tools.py
-    └── utils.py
+├── src
+│   ├── firewall.py
+│   ├── graph.py
+│   ├── nodes
+│   │   ├── analyzer.py
+│   │   ├── evaluator.py
+│   │   ├── notifier.py
+│   │   ├── parser.py
+│   │   └── proposer.py
+│   ├── state.py
+│   └── tools.py
+├── test_firewall.py
+└── test_graph.py
 ```
 
 ## 📝 License
@@ -69,3 +71,4 @@ GNU General Public License (GPL) 3.0
 
 ---
 
+ <!-- tree -I "__pycache__|agents_crewai_tactical_multimodal.egg-info|__init__.py|inputs|uv.lock|README.md|tests|*.log|*.db*|*.png|*.PNG" -->
