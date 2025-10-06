@@ -32,6 +32,10 @@ START → Parser → Analyzer → Proposer → Evaluator → [Plan OK?]
 # Install dependencies with uv
 uv sync
 
+# for test
+uv run python tests/test_graph.py
+
+
 # Run the application
 uv run python src/main.py
 ```

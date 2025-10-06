@@ -40,6 +40,7 @@
         "lon": -0.3986
       },
       "description": "New Heavy_Storm event.",
+      "comments": "Storm traveling to the north-east direction. High flood risk which may block the nearby roads.",
       "severity": "High"
     },
     {
@@ -59,7 +60,7 @@
         "lon": -0.5198
       },
       "description": "New Heavy_Storm event.",
-      "comments": "Storm traveling to the north-east direction",
+      "comments": "Storm traveling to the north-east direction.",
       "severity": "High"
     }
   ]

@@ -5,11 +5,12 @@ import os
 import requests
 from typing import Optional, List
 from langchain.agents import Tool
+from langsmith import traceable
 from .state import Asset, Danger
-
 
 # ==================== DISTANCE CALCULATION ====================
 
+@traceable(name="calculate_distance")
 def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
     Calculate the great-circle distance between two points on Earth using the haversine formula.
@@ -38,7 +39,7 @@ def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
     
     return earth_radius_km * c
 
-
+@traceable(name="calculate_route_distance")
 def calculate_route_distance(lat1: float, lon1: float, lat2: float, lon2: float, 
                              provider: str = "osrm") -> float:
     """
@@ -76,7 +77,7 @@ RISK_THRESHOLDS = {
     "Flood": {"high": 3.0, "medium": 8.0},
 }
 
-
+@traceable(name="assess_risk_level")
 def assess_risk_level(distance_km: float, danger_type: str, 
                      asset: Optional[Asset] = None, 
                      danger: Optional[Danger] = None) -> str:
@@ -206,6 +207,7 @@ def _assess_risk_with_llm(distance_km: float, danger_type: str,
 
 # ==================== PUSHOVER NOTIFICATIONS ====================
 
+@traceable(name="send_pushover_notification")
 def send_pushover_notification(
     message: str,
     title: str = "Emergency Alert",

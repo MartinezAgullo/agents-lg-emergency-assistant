@@ -14,7 +14,7 @@ from .nodes.notifier import send_notifications
 
 def should_retry_plan(state: GraphState) -> Literal["approved", "needs_improvement", "max_retries_reached"]:
     """Decide if the plan needs improvement based on quality score and retry count"""
-    if state["proposed_plan"].plan_quality_score >= 0.8:
+    if state["proposed_plan"].plan_quality_score >= 0.7:
         return "approved"
     elif state["retry_count"] < 3:
         return "needs_improvement"

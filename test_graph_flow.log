@@ -1,0 +1,316 @@
+
+================================================================================
+  🚨 EMERGENCY ASSISTANT - GRAPH TEST
+================================================================================
+
+📁 Loading actors data from data/actors.json...
+✅ Loaded 2 assets and 4 dangers
+
+💾 Setting up SQLite checkpointer...
+✅ Checkpointer ready
+
+🔧 Compiling emergency response graph...
+✅ Graph visualization saved to: /Users/pablo/Desktop/Scripts/agents_lg_emergency_assistant/data/emergency_graph.png
+✅ Graph compiled successfully
+   Graph visualization saved to: data/emergency_graph.png
+
+================================================================================
+  🚀 RUNNING GRAPH
+================================================================================
+
+▶️  Executing graph...
+
+✅ Graph visualization saved to: /Users/pablo/Desktop/Scripts/agents_lg_emergency_assistant/data/emergency_graph.png
+
+📊 State after: START
+--------------------------------------------------------------------------------
+
+📲 Notifications: ❌ Failed
+
+📊 State after: Parser
+--------------------------------------------------------------------------------
+✅ Assets parsed: 2
+   - datacenter_be48b252 (DataCenter)
+   - energyplant_3a6dd6e9 (EnergyPlant)
+✅ Dangers parsed: 4
+   - terrorist_ec56010e (Terrorist) [Medium]
+   - heavy_storm_52ef3b55 (Heavy_Storm) [High]
+   - fire_ad88377c (Fire)
+   - heavy_storm_9279d9a7 (Heavy_Storm) [High]
+
+📲 Notifications: ❌ Failed
+
+📊 State after: Analyzer
+--------------------------------------------------------------------------------
+✅ Assets parsed: 2
+   - datacenter_be48b252 (DataCenter)
+   - energyplant_3a6dd6e9 (EnergyPlant)
+✅ Dangers parsed: 4
+   - terrorist_ec56010e (Terrorist) [Medium]
+   - heavy_storm_52ef3b55 (Heavy_Storm) [High]
+   - fire_ad88377c (Fire)
+   - heavy_storm_9279d9a7 (Heavy_Storm) [High]
+
+🎯 Risk Assessments: 8
+   - High risk: 4
+   - Medium risk: 2
+   - Low risk: 2
+
+   High-risk situations:
+     • datacenter_be48b252 ← heavy_storm_52ef3b55 (5.94 km)
+     • datacenter_be48b252 ← heavy_storm_9279d9a7 (6.74 km)
+     • energyplant_3a6dd6e9 ← heavy_storm_52ef3b55 (4.96 km)
+     • energyplant_3a6dd6e9 ← fire_ad88377c (0.74 km)
+
+📲 Notifications: ❌ Failed
+
+📊 State after: Proposer
+--------------------------------------------------------------------------------
+✅ Assets parsed: 2
+   - datacenter_be48b252 (DataCenter)
+   - energyplant_3a6dd6e9 (EnergyPlant)
+✅ Dangers parsed: 4
+   - terrorist_ec56010e (Terrorist) [Medium]
+   - heavy_storm_52ef3b55 (Heavy_Storm) [High]
+   - fire_ad88377c (Fire)
+   - heavy_storm_9279d9a7 (Heavy_Storm) [High]
+
+🎯 Risk Assessments: 8
+   - High risk: 4
+   - Medium risk: 2
+   - Low risk: 2
+
+   High-risk situations:
+     • datacenter_be48b252 ← heavy_storm_52ef3b55 (5.94 km)
+     • datacenter_be48b252 ← heavy_storm_9279d9a7 (6.74 km)
+     • energyplant_3a6dd6e9 ← heavy_storm_52ef3b55 (4.96 km)
+     • energyplant_3a6dd6e9 ← fire_ad88377c (0.74 km)
+
+📋 Proposed Plan (Quality: 0.85)
+   - Assets to evacuate: 1
+     • energyplant_3a6dd6e9
+   - Helper assets: 3
+     • fire_station_1
+     • police_station_1
+     • emergency_medical_service
+   - Reasoning: The energy plant is at high risk from multiple dangers, including heavy storms and fire, which are imminent threats. The datacenter has high risk from...
+
+📲 Notifications: ❌ Failed
+
+📊 State after: Evaluator
+--------------------------------------------------------------------------------
+✅ Assets parsed: 2
+   - datacenter_be48b252 (DataCenter)
+   - energyplant_3a6dd6e9 (EnergyPlant)
+✅ Dangers parsed: 4
+   - terrorist_ec56010e (Terrorist) [Medium]
+   - heavy_storm_52ef3b55 (Heavy_Storm) [High]
+   - fire_ad88377c (Fire)
+   - heavy_storm_9279d9a7 (Heavy_Storm) [High]
+
+🎯 Risk Assessments: 8
+   - High risk: 4
+   - Medium risk: 2
+   - Low risk: 2
+
+   High-risk situations:
+     • datacenter_be48b252 ← heavy_storm_52ef3b55 (5.94 km)
+     • datacenter_be48b252 ← heavy_storm_9279d9a7 (6.74 km)
+     • energyplant_3a6dd6e9 ← heavy_storm_52ef3b55 (4.96 km)
+     • energyplant_3a6dd6e9 ← fire_ad88377c (0.74 km)
+
+📋 Proposed Plan (Quality: 0.75)
+   - Assets to evacuate: 1
+     • energyplant_3a6dd6e9
+   - Helper assets: 3
+     • fire_station_1
+     • police_station_1
+     • emergency_medical_service
+   - Reasoning: The energy plant is at high risk from multiple dangers, including heavy storms and fire, which are imminent threats. The datacenter has high risk from...
+
+💭 Evaluator Feedback:
+   The evacuation plan demonstrates a solid understanding of the immediate threats to the energy plant and prioritizes its evacuation effectively. However, the plan could be improved by addressing the po...
+
+🔄 Retry count: 1
+
+📲 Notifications: ❌ Failed
+
+📊 State after: Evaluator
+--------------------------------------------------------------------------------
+✅ Assets parsed: 2
+   - datacenter_be48b252 (DataCenter)
+   - energyplant_3a6dd6e9 (EnergyPlant)
+✅ Dangers parsed: 4
+   - terrorist_ec56010e (Terrorist) [Medium]
+   - heavy_storm_52ef3b55 (Heavy_Storm) [High]
+   - fire_ad88377c (Fire)
+   - heavy_storm_9279d9a7 (Heavy_Storm) [High]
+
+🎯 Risk Assessments: 8
+   - High risk: 4
+   - Medium risk: 2
+   - Low risk: 2
+
+   High-risk situations:
+     • datacenter_be48b252 ← heavy_storm_52ef3b55 (5.94 km)
+     • datacenter_be48b252 ← heavy_storm_9279d9a7 (6.74 km)
+     • energyplant_3a6dd6e9 ← heavy_storm_52ef3b55 (4.96 km)
+     • energyplant_3a6dd6e9 ← fire_ad88377c (0.74 km)
+
+📋 Proposed Plan (Quality: 0.85)
+   - Assets to evacuate: 2
+     • energyplant_3a6dd6e9
+     • datacenter_be48b252
+   - Helper assets: 2
+     • local_fire_station
+     • local_police_department
+   - Reasoning: The evacuation plan identifies both the Energy Plant and the Data Center as high-risk assets due to threats from heavy storms and fire. The Energy Pla...
+
+💭 Evaluator Feedback:
+   The evacuation plan demonstrates a solid understanding of the immediate threats to the energy plant and prioritizes its evacuation effectively. However, the plan could be improved by addressing the po...
+
+🔄 Retry count: 1
+
+📲 Notifications: ❌ Failed
+
+📊 State after: Evaluator
+--------------------------------------------------------------------------------
+✅ Assets parsed: 2
+   - datacenter_be48b252 (DataCenter)
+   - energyplant_3a6dd6e9 (EnergyPlant)
+✅ Dangers parsed: 4
+   - terrorist_ec56010e (Terrorist) [Medium]
+   - heavy_storm_52ef3b55 (Heavy_Storm) [High]
+   - fire_ad88377c (Fire)
+   - heavy_storm_9279d9a7 (Heavy_Storm) [High]
+
+🎯 Risk Assessments: 8
+   - High risk: 4
+   - Medium risk: 2
+   - Low risk: 2
+
+   High-risk situations:
+     • datacenter_be48b252 ← heavy_storm_52ef3b55 (5.94 km)
+     • datacenter_be48b252 ← heavy_storm_9279d9a7 (6.74 km)
+     • energyplant_3a6dd6e9 ← heavy_storm_52ef3b55 (4.96 km)
+     • energyplant_3a6dd6e9 ← fire_ad88377c (0.74 km)
+
+📋 Proposed Plan (Quality: 0.75)
+   - Assets to evacuate: 2
+     • energyplant_3a6dd6e9
+     • datacenter_be48b252
+   - Helper assets: 2
+     • local_fire_station
+     • local_police_department
+   - Reasoning: The evacuation plan identifies both the Energy Plant and the Data Center as high-risk assets due to threats from heavy storms and fire. The Energy Pla...
+
+💭 Evaluator Feedback:
+   The evacuation plan is well-structured but has some critical gaps that need addressing. While it identifies the Energy Plant and Data Center as high-risk assets and includes appropriate helper assets,...
+
+🔄 Retry count: 2
+
+📲 Notifications: ❌ Failed
+
+📊 State after: Evaluator
+--------------------------------------------------------------------------------
+✅ Assets parsed: 2
+   - datacenter_be48b252 (DataCenter)
+   - energyplant_3a6dd6e9 (EnergyPlant)
+✅ Dangers parsed: 4
+   - terrorist_ec56010e (Terrorist) [Medium]
+   - heavy_storm_52ef3b55 (Heavy_Storm) [High]
+   - fire_ad88377c (Fire)
+   - heavy_storm_9279d9a7 (Heavy_Storm) [High]
+
+🎯 Risk Assessments: 8
+   - High risk: 4
+   - Medium risk: 2
+   - Low risk: 2
+
+   High-risk situations:
+     • datacenter_be48b252 ← heavy_storm_52ef3b55 (5.94 km)
+     • datacenter_be48b252 ← heavy_storm_9279d9a7 (6.74 km)
+     • energyplant_3a6dd6e9 ← heavy_storm_52ef3b55 (4.96 km)
+     • energyplant_3a6dd6e9 ← fire_ad88377c (0.74 km)
+
+📋 Proposed Plan (Quality: 0.85)
+   - Assets to evacuate: 2
+     • energyplant_3a6dd6e9
+     • datacenter_be48b252
+   - Helper assets: 3
+     • local_fire_department
+     • local_police_department
+     • hazmat_team
+   - Reasoning: The Energy Plant and Data Center have been identified as high-risk assets due to their proximity to dangers such as heavy storms and fire. The Energy ...
+
+💭 Evaluator Feedback:
+   The evacuation plan is well-structured but has some critical gaps that need addressing. While it identifies the Energy Plant and Data Center as high-risk assets and includes appropriate helper assets,...
+
+🔄 Retry count: 2
+
+📲 Notifications: ❌ Failed
+
+📊 State after: Evaluator
+--------------------------------------------------------------------------------
+✅ Assets parsed: 2
+   - datacenter_be48b252 (DataCenter)
+   - energyplant_3a6dd6e9 (EnergyPlant)
+✅ Dangers parsed: 4
+   - terrorist_ec56010e (Terrorist) [Medium]
+   - heavy_storm_52ef3b55 (Heavy_Storm) [High]
+   - fire_ad88377c (Fire)
+   - heavy_storm_9279d9a7 (Heavy_Storm) [High]
+
+🎯 Risk Assessments: 8
+   - High risk: 4
+   - Medium risk: 2
+   - Low risk: 2
+
+   High-risk situations:
+     • datacenter_be48b252 ← heavy_storm_52ef3b55 (5.94 km)
+     • datacenter_be48b252 ← heavy_storm_9279d9a7 (6.74 km)
+     • energyplant_3a6dd6e9 ← heavy_storm_52ef3b55 (4.96 km)
+     • energyplant_3a6dd6e9 ← fire_ad88377c (0.74 km)
+
+📋 Proposed Plan (Quality: 0.75)
+   - Assets to evacuate: 2
+     • energyplant_3a6dd6e9
+     • datacenter_be48b252
+   - Helper assets: 3
+     • local_fire_department
+     • local_police_department
+     • hazmat_team
+   - Reasoning: The Energy Plant and Data Center have been identified as high-risk assets due to their proximity to dangers such as heavy storms and fire. The Energy ...
+
+💭 Evaluator Feedback:
+   While the evacuation plan addresses the immediate risks associated with the Energy Plant and Data Center, there are several areas for improvement. The plan could benefit from a more comprehensive asse...
+
+🔄 Retry count: 3
+
+📲 Notifications: ❌ Failed
+❌ Pushover API error: 400 - {"token":"invalid","errors":["application token is invalid, see https://pushover.net/api"],"status":0,"request":"dbb4974d-06d2-461d-b02c-e1b3750e566f"}
+
+📊 State after: Evaluator
+--------------------------------------------------------------------------------
+❌ Error: Failed to send notifications
+
+================================================================================
+  ✅ GRAPH EXECUTION COMPLETE
+================================================================================
+
+📊 Final Statistics:
+   Total steps executed: 10
+   Total retries: 3
+
+🎯 Final Plan Summary:
+   - Quality Score: 0.75
+   - Assets evacuated: 2
+   - Helpers deployed: 3
+   - Notifications sent: No
+
+💡 View detailed traces in LangSmith:
+   https://smith.langchain.com/
+
+================================================================================
+  🏁 TEST COMPLETE
+================================================================================
