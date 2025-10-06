@@ -32,9 +32,9 @@ pip-wheel-metadata/
 # ----------------------------------------------------
 __init__.py
 */__init__.py
+*.log
 
 # Ignore sensitive environment variables
 .env
 
-
-
+.pre-commit-config.yaml

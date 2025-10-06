@@ -1,0 +1,188 @@
+assets:
+- id: radar_sendai_1
+  type: RADAR
+  location:
+    lat: 38.2682
+    lon: 140.8694
+  comments: Operational sweep expanded; tracking anomalies.
+  timestamp: '2025-10-06 17:00:05'
+  source: Scenario simulation
+  tags:
+  - radar
+  - medium
+  - asset
+
+- id: data_center_tokyo_2
+  type: DATA_CENTER
+  location:
+  lat: 35.6895
+  lon: 139.6917
+  comments: Core services stable; backup generators tested.
+  timestamp: '2025-10-06 17:01:15'
+  source: Scenario simulation
+  tags:
+  - data_center
+  - low
+  - asset
+
+- id: energy_plant_chiba_3
+  type: ENERGY_PLANT
+  location:
+  lat: 35.6073
+  lon: 140.1063
+  comments: Output load balanced; grid frequency stable.
+  timestamp: '2025-10-06 17:02:40'
+  source: Scenario simulation
+  tags:
+  - energy_plant
+  - medium
+  - asset
+
+- id: hospital_yokohama_4
+  type: HOSPITAL
+  location:
+  lat: 35.4437
+  lon: 139.6380
+  comments: ER on standby; triage tents ready.
+  timestamp: '2025-10-06 17:03:20'
+  source: Scenario simulation
+  tags:
+  - hospital
+  - high
+  - asset
+
+- id: firemen_kawasaki_5
+  type: FIREMEN
+  location:
+  lat: 35.5308
+  lon: 139.7036
+  comments: Foam units ready; hydrant pressure confirmed.
+  timestamp: '2025-10-06 17:04:05'
+  source: Scenario simulation
+  tags:
+  - firemen
+  - medium
+  - asset
+
+- id: police_tokyo_6
+  type: POLICE
+  location:
+    lat: 35.6762
+    lon: 139.6503
+  comments: Perimeter established; traffic diverted.
+  timestamp: '2025-10-06 17:04:45'
+  source: Scenario simulation
+  tags:
+  - police
+  - medium
+  - asset
+
+- id: military_saitama_7
+  type: MILITARY
+  location:
+    lat: 35.8617
+    lon: 139.6455
+  comments: Engineering battalion mobilized; bridging assets prepared.
+  timestamp: '2025-10-06 17:05:30'
+  source: Scenario simulation
+  tags:
+  - military
+  - high
+  - asset
+
+- id: cct_ambulance_chiba_8
+  type: CCT_AMBULANCE
+  location:
+    lat: 35.6073
+    lon: 140.1063
+  comments: Critical care transport activated; ECMO ready.
+  timestamp: '2025-10-06 17:06:10'
+  source: Scenario simulation
+  tags:
+  - cct_ambulance
+  - medium
+  - asset
+
+- id: evacuation_zone_koto_9
+  type: EVACUATION_ZONE
+  location:
+    lat: 35.6729
+    lon: 139.8173
+  comments: Assembly points marked; signage deployed.
+  timestamp: '2025-10-06 17:06:55'
+  source: Scenario simulation
+  tags:
+  - evacuation_zone
+  - medium
+  - asset
+
+dangers:
+- id: heavy_storm_boso_1
+  type: HEAVY_STORM
+  location:
+    lat: 35.1400
+    lon: 140.1000
+  comments: Drainage overwhelmed in pockets; sandbags deployed.
+  severity: Medium
+  timestamp: '2025-10-06 17:02:00'
+  source: Scenario simulation
+  tags:
+  - heavy_storm
+  - medium
+  - danger
+
+- id: flood_tokyo_bay_2
+  type: FLOOD
+  location:
+    lat: 35.6000
+    lon: 139.8000
+  comments: Levee overtopping in sectors; emergency reinforcement.
+  severity: High
+  timestamp: '2025-10-06 17:03:30'
+  source: Scenario simulation
+  tags:
+  - flood
+  - high
+  - danger
+
+- id: flood_sumida_3
+  type: FLOOD
+  location:
+    lat: 35.7100
+    lon: 139.8107
+  comments: Rapid rise; vehicles stranded in underpasses.
+  severity: High
+  timestamp: '2025-10-06 17:05:10'
+  source: Scenario simulation
+  tags:
+  - flood
+  - high
+  - danger
+
+- id: flood_yokohama_4
+  type: FLOOD
+  location:
+    lat: 35.4437
+    lon: 139.6380
+  comments: Wide-area inundation; boat rescues initiated.
+  severity: High
+  timestamp: '2025-10-06 17:06:20'
+  source: Scenario simulation
+  tags:
+  - flood
+  - high
+  - danger
+
+- id: flood_edogawa_5
+  type: FLOOD
+  location:
+    lat: 35.7074
+    lon: 139.8673
+  comments: Wastewater overflow; health advisory issued.
+  severity: Medium
+  timestamp: '2025-10-06 17:07:05'
+  source: Scenario simulation
+  tags:
+  - flood
+  - medium
+  - danger

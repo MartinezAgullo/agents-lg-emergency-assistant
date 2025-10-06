@@ -1,9 +1,9 @@
 # src/nodes/parser.py
 
-from typing import Dict, Any
-from ..state import GraphState, Asset, Danger
-from ..firewall import validate_input
+from typing import Any, Dict
 
+from ..firewall import validate_input
+from ..state import Asset, Danger, GraphState
 
 
 def parse_input(state: GraphState) -> Dict[str, Any]:
@@ -18,29 +18,23 @@ def parse_input(state: GraphState) -> Dict[str, Any]:
 
     if not is_valid:
         # Firewall blocked the input
-        return {
-            "assets": [],
-            "dangers": [],
-            "error": error_message
-        }
-    
+        return {"assets": [], "dangers": [], "error": error_message}
+
     # Step 2: Parse validated data into Pydantic models
     try:
         # Parse assets
         assets = [Asset(**asset_data) for asset_data in raw_input.get("assets", [])]
-        
+
         # Parse dangers
-        dangers = [Danger(**danger_data) for danger_data in raw_input.get("dangers", [])]
-        
-        return {
-            "assets": assets,
-            "dangers": dangers,
-            "error": None
-        }
-    
+        dangers = [
+            Danger(**danger_data) for danger_data in raw_input.get("dangers", [])
+        ]
+
+        return {"assets": assets, "dangers": dangers, "error": None}
+
     except Exception as e:
         return {
             "assets": [],
             "dangers": [],
-            "error": f"Failed to parse input: {str(e)}"
+            "error": f"Failed to parse input: {str(e)}",
         }

@@ -21,3 +21,14 @@ dependencies = [
     "pygraphviz>=1.11", # For graph visualization
     #"grandalf>=0.7",     # Alternative for visualization if pygraphviz has issues
 ]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "ruff>=0.1.0",
+]
