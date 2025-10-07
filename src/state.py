@@ -1,4 +1,4 @@
-from typing import List, Optional, TypedDict
+from typing import Dict, List, Optional, TypedDict
 
 from pydantic import BaseModel, Field
 
@@ -76,6 +76,9 @@ class EvacuationPlan(BaseModel):
     """
 
     assets_to_evacuate: List[str]
+    evacuation_zone_assignments: Optional[Dict[str, str]] = Field(
+        default=None, description="Mapping of asset_id to assigned evacuation_zone_id"
+    )
     helpers: List[str]  # Actors assigned to assist
     plan_quality_score: float  # For self-evaluation
     reasoning: str

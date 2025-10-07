@@ -41,10 +41,6 @@ def find_nearest_safe_location(
         )
 
         if straight_distance < min_distance:
-            """
-            We are doing this because straight-line distance difference from the route distance
-            is only relevant after some kms.
-            """
             # Calculate actual route distance for the closest candidate
             try:
                 actual_route = calculate_route_distance(

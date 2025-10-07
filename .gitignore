@@ -40,3 +40,4 @@ __init__.py
 .pre-commit-config.yaml
 
 checkpoints/*.*
+checkpoints

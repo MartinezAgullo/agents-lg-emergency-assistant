@@ -145,9 +145,23 @@ def format_evacuation_plan(plan) -> str:
     output = "### Evacuation Plan\n\n"
     output += f"**Quality Score:** {plan.plan_quality_score:.2f}\n\n"
 
-    output += f"#### Assets to Evacuate ({len(plan.assets_to_evacuate)})\n"
-    for asset_id in plan.assets_to_evacuate:
-        output += f"- {asset_id}\n"
+    # Filter out evacuation zones from the assets_to_evacuate list
+    assets_to_evacuate_filtered = [
+        asset_id
+        for asset_id in plan.assets_to_evacuate
+        if not asset_id.startswith("evacuation_zone")
+    ]
+
+    output += f"#### Assets to Evacuate ({len(assets_to_evacuate_filtered)})\n"
+
+    # Show evacuation zone assignments if available
+    if plan.evacuation_zone_assignments:
+        for asset_id in assets_to_evacuate_filtered:
+            zone_id = plan.evacuation_zone_assignments.get(asset_id, "Not assigned")
+            output += f"- {asset_id} → **{zone_id}**\n"
+    else:
+        for asset_id in assets_to_evacuate_filtered:
+            output += f"- {asset_id}\n"
 
     output += f"\n#### Helper Assets ({len(plan.helpers)})\n"
     for helper_id in plan.helpers:
