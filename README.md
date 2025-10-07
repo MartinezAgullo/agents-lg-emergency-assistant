@@ -38,7 +38,7 @@ uv run python tests/test_graph.py
 
 
 # Run the application
-uv run python src/main.py
+uv run python main.py
 ```
 
 ## 📁 Project Structure

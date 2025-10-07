@@ -38,3 +38,5 @@ __init__.py
 .env
 
 .pre-commit-config.yaml
+
+checkpoints/*.*

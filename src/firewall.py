@@ -70,8 +70,8 @@ SUSPICIOUS_KEYWORDS = [
 # Required JSON structure fields
 REQUIRED_FIELDS = {"assets": list, "dangers": list}
 
-REQUIRED_ASSET_FIELDS = ["id", "type", "location", "description"]
-REQUIRED_DANGER_FIELDS = ["id", "type", "location", "description"]
+REQUIRED_ASSET_FIELDS = ["id", "type", "location"]
+REQUIRED_DANGER_FIELDS = ["id", "type", "location"]
 
 
 # ==================== VALIDATION FUNCTIONS ====================

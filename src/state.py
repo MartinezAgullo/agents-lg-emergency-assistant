@@ -16,10 +16,18 @@ class Asset(BaseModel):
     id: str
     type: str
     location: dict
-    description: str
     comments: Optional[str] = Field(
         default=None,
         description="Additional context about vulnerability or special conditions",
+    )
+    timestamp: Optional[str] = Field(
+        default=None, description="When this asset data was recorded"
+    )
+    source: Optional[str] = Field(
+        default=None, description="Source of this asset information"
+    )
+    tags: Optional[List[str]] = Field(
+        default=None, description="Tags for categorization"
     )
 
 
@@ -31,12 +39,20 @@ class Danger(BaseModel):
     id: str
     type: str
     location: dict
-    description: str
     comments: Optional[str] = Field(
         default=None, description="Additional threat context or evolution details"
     )
     severity: Optional[str] = Field(
         default=None, description="Threat intensity: low, medium, or high"
+    )
+    timestamp: Optional[str] = Field(
+        default=None, description="When this danger was detected"
+    )
+    source: Optional[str] = Field(
+        default=None, description="Source of this danger information"
+    )
+    tags: Optional[List[str]] = Field(
+        default=None, description="Tags for categorization"
     )
 
 
@@ -79,7 +95,7 @@ class GraphState(TypedDict):
 
     # Analysis
     risk_assessments: List[RiskAssessment]
-    route_details: Optional[List[dict]]
+    route_details: Optional[List[dict]]  # NEW: Evacuation route information
 
     # Planning
     proposed_plan: Optional[EvacuationPlan]

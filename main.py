@@ -6,13 +6,15 @@ Web interface for the emergency response AI system using LangGraph.
 Provides interactive map visualization and plan generation.
 """
 
-import json
 import os
 from pathlib import Path
 from typing import Any, Dict
 
+import folium
 import gradio as gr
 from dotenv import load_dotenv
+from folium.plugins import MarkerCluster
+from gradio_folium import Folium
 from langgraph.checkpoint.sqlite import SqliteSaver
 
 from src.graph import compile_graph
@@ -25,27 +27,27 @@ load_dotenv()
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "emergency-assistant"
 
+# Map configuration
+ORIGIN_COORDS = (39.4699, -0.3763)  # Valencia, Spain
+
 
 # ==================== GRAPH EXECUTION ====================
 
 
-def run_emergency_response(actors_json: str) -> Dict[str, Any]:
+def run_emergency_response(actors_data: str) -> Dict[str, Any]:
     """
     Execute the emergency response graph with the provided input.
 
     Args:
-        actors_json: JSON string with assets and dangers
+        actors_data: YAML or JSON string with assets and dangers
 
     Returns:
         Dictionary with execution results
     """
     try:
-        # Parse input
-        actors_data = json.loads(actors_json)
-
-        # Prepare initial state
+        # Prepare initial state (parser will handle YAML/JSON conversion)
         initial_state: GraphState = {
-            "raw_input": actors_data,
+            "raw_input": actors_data,  # Pass as string - parser handles it
             "assets": [],
             "dangers": [],
             "risk_assessments": [],
@@ -82,8 +84,6 @@ def run_emergency_response(actors_json: str) -> Dict[str, Any]:
                 "error": final_state.get("error") if final_state else None,
             }
 
-    except json.JSONDecodeError as e:
-        return {"success": False, "state": None, "error": f"Invalid JSON: {str(e)}"}
     except Exception as e:
         return {"success": False, "state": None, "error": f"Execution error: {str(e)}"}
 
@@ -158,14 +158,22 @@ def format_evacuation_plan(plan) -> str:
     return output
 
 
-def create_map_html(state: Dict[str, Any]) -> str:
-    """Create an interactive map with Leaflet.js"""
+# ==================== MAP CREATION ====================
 
+
+def create_empty_map():
+    """Create an empty Folium map centered on Valencia"""
+    m = folium.Map(location=ORIGIN_COORDS, zoom_start=10, tiles="cartodbdark_matter")
+    return m
+
+
+def create_map_with_data(state: Dict[str, Any]):
+    """Create a Folium map with assets and dangers"""
     assets = state.get("assets", [])
     dangers = state.get("dangers", [])
 
     if not assets and not dangers:
-        return "<p>No data to display</p>"
+        return create_empty_map()
 
     # Calculate map center
     all_lats = [a.location["lat"] for a in assets] + [
@@ -177,88 +185,65 @@ def create_map_html(state: Dict[str, Any]) -> str:
     center_lat = sum(all_lats) / len(all_lats)
     center_lon = sum(all_lons) / len(all_lons)
 
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <style>
-            #map {{ height: 500px; width: 100%; }}
-        </style>
-    </head>
-    <body>
-        <div id="map"></div>
-        <script>
-            var map = L.map('map').setView([{center_lat}, {center_lon}], 11);
+    # Create map
+    m = folium.Map(
+        location=[center_lat, center_lon], zoom_start=11, tiles="cartodbdark_matter"
+    )
 
-            L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
-                maxZoom: 19,
-                attribution: '© OpenStreetMap contributors'
-            }}).addTo(map);
+    # Add markers with clustering
+    cluster = MarkerCluster().add_to(m)
 
-            // Asset markers (blue)
-            var assetIcon = L.icon({{
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            }});
-
-            // Danger markers (red)
-            var dangerIcon = L.icon({{
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            }});
-
-            // SafePlace markers (green)
-            var safePlaceIcon = L.icon({{
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            }});
-    """
-
-    # Add assets
+    # Add assets (blue markers)
     for asset in assets:
         lat = asset.location["lat"]
         lon = asset.location["lon"]
-        icon = "safePlaceIcon" if asset.type == "SafePlace" else "assetIcon"
-        popup = f"<b>{asset.type}</b><br>{asset.id}<br>{asset.description}"
-        html += f"""
-            L.marker([{lat}, {lon}], {{icon: {icon}}})
-                .addTo(map)
-                .bindPopup("{popup}");
-        """
 
-    # Add dangers
+        # Build popup
+        popup_html = f"""
+        <b>{asset.type}</b><br>
+        ID: {asset.id}<br>
+        """
+        if asset.comments:
+            popup_html += f"Comments: {asset.comments}<br>"
+        if hasattr(asset, "timestamp") and asset.timestamp:
+            popup_html += f"Time: {asset.timestamp}"
+
+        color = "green" if asset.type in ["SafePlace", "EVACUATION_ZONE"] else "blue"
+
+        folium.Marker(
+            location=[lat, lon],
+            popup=folium.Popup(popup_html, max_width=300),
+            icon=folium.Icon(color=color, icon="info-sign"),
+        ).add_to(cluster)
+
+    # Add dangers (red markers)
     for danger in dangers:
         lat = danger.location["lat"]
         lon = danger.location["lon"]
         severity = getattr(danger, "severity", "unknown")
-        popup = f"<b>{danger.type}</b><br>{danger.id}<br>Severity: {severity}<br>{danger.description}"
-        html += f"""
-            L.marker([{lat}, {lon}], {{icon: dangerIcon}})
-                .addTo(map)
-                .bindPopup("{popup}");
+
+        # Build popup
+        popup_html = f"""
+        <b>{danger.type}</b><br>
+        ID: {danger.id}<br>
+        Severity: {severity}<br>
         """
+        if danger.comments:
+            popup_html += f"Comments: {danger.comments}<br>"
+        if hasattr(danger, "timestamp") and danger.timestamp:
+            popup_html += f"Time: {danger.timestamp}"
 
-    html += """
-        </script>
-    </body>
-    </html>
-    """
+        folium.Marker(
+            location=[lat, lon],
+            popup=folium.Popup(popup_html, max_width=300),
+            icon=folium.Icon(color="red", icon="exclamation-sign"),
+        ).add_to(cluster)
 
-    return html
+    # Fit bounds to show all markers
+    if all_lats and all_lons:
+        m.fit_bounds([[min(all_lats), min(all_lons)], [max(all_lats), max(all_lons)]])
+
+    return m
 
 
 # ==================== GRADIO INTERFACE ====================
@@ -274,14 +259,14 @@ def process_emergency(actors_json: str):
             "",
             "",
             "",
-            "<p>No map available</p>",
+            Folium(create_empty_map()),
         )
 
     # Run graph
     result = run_emergency_response(actors_json)
 
     if not result["success"]:
-        return (f"Error: {result['error']}", "", "", "", "<p>Execution failed</p>")
+        return (f"❌ Error: {result['error']}", "", "", "", Folium(create_empty_map()))
 
     state = result["state"]
 
@@ -299,18 +284,19 @@ def process_emergency(actors_json: str):
         status = "✅ Emergency plan generated (notifications not sent)"
 
     # Create map
-    map_html = create_map_html(state)
+    map_obj = create_map_with_data(state)
 
-    return status, risk_text, route_text, plan_text, map_html
+    return status, risk_text, route_text, plan_text, Folium(map_obj)
 
 
-def load_example_file(filepath: str = "data/actors_with_safeplaces.json") -> str:
-    """Load example actors file"""
+def load_example_file(filepath: str = "data/actors_japan.yaml") -> str:
+    """Load example actors file (YAML or JSON)"""
     try:
         with open(filepath, "r") as f:
             return f.read()
     except FileNotFoundError:
-        return json.dumps({"assets": [], "dangers": []}, indent=2)
+        # Fallback to empty YAML
+        return "assets: []\ndangers: []"
 
 
 # ==================== GRADIO APP ====================
@@ -322,19 +308,20 @@ def create_interface():
     with gr.Blocks(title="Emergency Assistant", theme=gr.themes.Soft()) as app:
         gr.Markdown("""
         # 🚨 Emergency Response Assistant
-
-        AI-powered emergency decision-making system using LangGraph.
-        Upload or paste your emergency scenario data to generate an evacuation plan.
+        AI-powered emergency decision-making system using LangGraph
         """)
 
+        # Top row: Input and Map side by side
         with gr.Row():
+            # Left column: Input data
             with gr.Column(scale=1):
-                gr.Markdown("### Input Data")
+                gr.Markdown("### 📝 Input Data")
 
                 input_json = gr.Code(
-                    label="Emergency Scenario (JSON)",
-                    language="json",
-                    lines=15,
+                    label="Emergency Scenario (YAML or JSON)",
+                    language="yaml",
+                    lines=20,
+                    max_lines=20,
                     value=load_example_file(),
                 )
 
@@ -347,38 +334,64 @@ def create_interface():
 
                 status_output = gr.Markdown(label="Status")
 
-            with gr.Column(scale=1):
-                gr.Markdown("### Map Visualization")
-                map_output = gr.HTML(label="Interactive Map")
-
-        with gr.Row():
-            with gr.Column():
-                risk_output = gr.Markdown(label="Risk Assessment")
-
-            with gr.Column():
+                # Route analysis under input
+                gr.Markdown("### 🛣️ Route Analysis")
                 route_output = gr.Markdown(label="Evacuation Routes")
 
+            # Right column: Map visualization
+            with gr.Column(scale=1):
+                gr.Markdown("### 🗺️ Map Visualization")
+                map_output = Folium(create_empty_map())
+
+        # Full width: Risk assessment
         with gr.Row():
-            plan_output = gr.Markdown(label="Evacuation Plan")
+            with gr.Column():
+                gr.Markdown("### 🎯 Risk Assessment")
+                risk_output = gr.Markdown(label="Risk Summary")
 
-        gr.Markdown("""
-        ---
-        ### How to Use
+        # Full width: Evacuation plan
+        with gr.Row():
+            with gr.Column():
+                gr.Markdown("### 📋 Evacuation Plan")
+                plan_output = gr.Markdown(label="Final Plan")
 
-        1. **Input Format:** Provide JSON with `assets` and `dangers` arrays
-        2. **Asset Types:** DataCenter, EnergyPlant, SafePlace, etc.
-        3. **Danger Types:** Fire, Heavy_Storm, Terrorist, Flood
-        4. **Optional Fields:** Add `comments` and `severity` for enhanced analysis
-        5. **Safe Places:** Include SafePlace assets for route calculation
+        # Collapsible instructions
+        with gr.Accordion("ℹ️ How to Use", open=False):
+            gr.Markdown("""
+            ### Input Format
+            Provide YAML or JSON with `assets` and `dangers` arrays:
 
-        The system will:
-        - Analyze risks based on proximity and threat type
-        - Calculate evacuation routes to safe locations
-        - Generate an optimized evacuation plan
-        - Send notifications via Pushover (if configured)
+            **Asset Types:** RADAR, DATA_CENTER, ENERGY_PLANT, HOSPITAL, FIREMEN, POLICE, MILITARY, CCT_AMBULANCE, EVACUATION_ZONE
 
-        View detailed traces in [LangSmith](https://smith.langchain.com/)
-        """)
+            **Danger Types:** FIRE, HEAVY_STORM, TERRORIST, FLOOD, EARTHQUAKE
+
+            **Required Fields:**
+            - `id`: Unique identifier
+            - `type`: Asset or danger type
+            - `location`: Object with `lat` and `lon`
+
+            **Optional Fields:**
+            - `comments`: Additional context
+            - `severity`: Low, Medium, High, Critical
+            - `timestamp`: When recorded
+            - `source`: Data source
+            - `tags`: Array of tags
+
+            ### System Features
+            - ✅ Parses YAML/JSON automatically
+            - ✅ Validates input through AI firewall
+            - ✅ Analyzes risks by proximity and type
+            - ✅ Calculates evacuation routes
+            - ✅ Generates optimized plans
+            - ✅ Sends Pushover notifications
+
+            ### Map Legend
+            - 🔵 Blue markers: Assets (protected resources)
+            - 🟢 Green markers: Safe places / Evacuation zones
+            - 🔴 Red markers: Dangers (threats)
+
+            View detailed traces in [LangSmith](https://smith.langchain.com/)
+            """)
 
         # Event handlers
         submit_btn.click(
@@ -388,12 +401,16 @@ def create_interface():
         )
 
         clear_btn.click(
-            fn=lambda: ("", "", "", "", "<p>No map</p>"),
+            fn=lambda: ("", "", "", "", Folium(create_empty_map())),
             inputs=[],
             outputs=[status_output, risk_output, route_output, plan_output, map_output],
         )
 
-        load_example_btn.click(fn=load_example_file, inputs=[], outputs=[input_json])
+        load_example_btn.click(
+            fn=lambda: load_example_file("data/actors_japan.yaml"),
+            inputs=[],
+            outputs=[input_json],
+        )
 
     return app
 
@@ -423,6 +440,7 @@ def main():
     print("=" * 80)
     print("\n📊 LangSmith Project: emergency-assistant")
     print("💾 Checkpoints: checkpoints/gradio_emergency.db")
+    print("🗺️  Map: Folium with dark theme")
     print("🌐 Opening browser...\n")
 
     app.launch(server_name="127.0.0.1", server_port=7860, share=False, show_error=True)

@@ -20,6 +20,9 @@ dependencies = [
     "langgraph-checkpoint-sqlite>=0.1.0", # Para SQLite checkpoints
     "pygraphviz>=1.11", # For graph visualization
     #"grandalf>=0.7",     # Alternative for visualization if pygraphviz has issues
+    "pyyaml>=6.0.0",
+    "folium>=0.20.0",
+    "gradio-folium>=0.0.7",
 ]
 
 [dependency-groups]
