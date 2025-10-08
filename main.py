@@ -91,7 +91,7 @@ def run_emergency_response(actors_data: str) -> Dict[str, Any]:
 # ==================== UI FORMATTERS ====================
 
 
-def format_risk_assessments(risk_assessments) -> str:
+def format_risk_assessments(risk_assessments, make_clickable=False) -> str:
     """Format risk assessments for display"""
     if not risk_assessments:
         return "No risk assessments available"
@@ -108,7 +108,10 @@ def format_risk_assessments(risk_assessments) -> str:
     if high:
         output += "#### High-Risk Situations:\n"
         for r in high:
-            output += f"- `{r.asset_id}` threatened by `{r.danger_id}` ({r.distance_km:.2f} km)\n"
+            if make_clickable:
+                output += f"- `{r.asset_id}` threatened by `{r.danger_id}` ({r.distance_km:.2f} km) [🔍 Click IDs below to zoom]\n"
+            else:
+                output += f"- `{r.asset_id}` threatened by `{r.danger_id}` ({r.distance_km:.2f} km)\n"
 
     return output
 
@@ -173,18 +176,135 @@ def format_evacuation_plan(plan) -> str:
 
 
 # ==================== MAP CREATION ====================
-
-
 def create_empty_map():
     """Create an empty Folium map centered on Valencia"""
     m = folium.Map(location=ORIGIN_COORDS, zoom_start=10, tiles="cartodbdark_matter")
     return m
 
 
-def create_map_with_data(state: Dict[str, Any]):
-    """Create a Folium map with assets and dangers"""
+def create_map_centered_on_item(state: Dict[str, Any], item_id: str, zoom: int = 15):
+    """Create a map centered on a specific asset or danger"""
     assets = state.get("assets", [])
     dangers = state.get("dangers", [])
+
+    # Find the item by ID
+    target = None
+    for asset in assets:
+        if asset.id == item_id:
+            target = asset
+            break
+
+    if not target:
+        for danger in dangers:
+            if danger.id == item_id:
+                target = danger
+                break
+
+    if not target:
+        return create_map_with_data(state)  # Fallback to normal map
+
+    # Create map centered on target
+    center_lat = target.location["lat"]
+    center_lon = target.location["lon"]
+
+    m = folium.Map(
+        location=[center_lat, center_lon], zoom_start=zoom, tiles="cartodbdark_matter"
+    )
+
+    # Add all markers (same as before)
+    cluster = MarkerCluster().add_to(m)
+    final_plan = state.get("final_plan")
+
+    # Add assets
+    for asset in assets:
+        lat = asset.location["lat"]
+        lon = asset.location["lon"]
+
+        popup_html = f"<b>{asset.type}</b><br>ID: {asset.id}<br>"
+        if asset.comments:
+            popup_html += f"Comments: {asset.comments}<br>"
+        if hasattr(asset, "timestamp") and asset.timestamp:
+            popup_html += f"Time: {asset.timestamp}"
+
+        if asset.type in ["SafePlace", "EVACUATION_ZONE"]:
+            color = "green"
+            icon = "home"
+        elif final_plan and asset.id in final_plan.assets_to_evacuate:
+            color = "orange"
+            icon = "exclamation-sign"
+        else:
+            color = "blue"
+            icon = "info-sign"
+
+        # Highlight the target item
+        if asset.id == item_id:
+            icon = folium.Icon(color=color, icon=icon, icon_color="yellow")
+        else:
+            icon = folium.Icon(color=color, icon=icon)
+
+        folium.Marker(
+            location=[lat, lon],
+            popup=folium.Popup(popup_html, max_width=300),
+            icon=icon,
+        ).add_to(cluster)
+
+    # Add dangers
+    for danger in dangers:
+        lat = danger.location["lat"]
+        lon = danger.location["lon"]
+        severity = getattr(danger, "severity", "unknown")
+
+        popup_html = (
+            f"<b>{danger.type}</b><br>ID: {danger.id}<br>Severity: {severity}<br>"
+        )
+        if danger.comments:
+            popup_html += f"Comments: {danger.comments}<br>"
+        if hasattr(danger, "timestamp") and danger.timestamp:
+            popup_html += f"Time: {danger.timestamp}"
+
+        # Highlight the target item
+        if danger.id == item_id:
+            icon = folium.Icon(
+                color="red", icon="exclamation-sign", icon_color="yellow"
+            )
+        else:
+            icon = folium.Icon(color="red", icon="exclamation-sign")
+
+        folium.Marker(
+            location=[lat, lon],
+            popup=folium.Popup(popup_html, max_width=300),
+            icon=icon,
+        ).add_to(cluster)
+
+    # Draw evacuation routes if plan exists
+    if final_plan and final_plan.evacuation_zone_assignments:
+        for asset_id, zone_id in final_plan.evacuation_zone_assignments.items():
+            asset = next((a for a in assets if a.id == asset_id), None)
+            zone = next((a for a in assets if a.id == zone_id), None)
+
+            if asset and zone:
+                folium.PolyLine(
+                    locations=[
+                        [asset.location["lat"], asset.location["lon"]],
+                        [zone.location["lat"], zone.location["lon"]],
+                    ],
+                    color="yellow",
+                    weight=3,
+                    opacity=0.7,
+                    popup=f"Evacuation route: {asset_id} → {zone_id}",
+                ).add_to(m)
+
+    return m
+    """Create an empty Folium map centered on Valencia"""
+    m = folium.Map(location=ORIGIN_COORDS, zoom_start=10, tiles="cartodbdark_matter")
+    return m
+
+
+def create_map_with_data(state: Dict[str, Any]):
+    """Create a Folium map with assets, dangers, and evacuation routes"""
+    assets = state.get("assets", [])
+    dangers = state.get("dangers", [])
+    final_plan = state.get("final_plan")
 
     if not assets and not dangers:
         return create_empty_map()
@@ -222,12 +342,21 @@ def create_map_with_data(state: Dict[str, Any]):
         if hasattr(asset, "timestamp") and asset.timestamp:
             popup_html += f"Time: {asset.timestamp}"
 
-        color = "green" if asset.type in ["SafePlace", "EVACUATION_ZONE"] else "blue"
+        # Determine color based on type and evacuation status
+        if asset.type in ["SafePlace", "EVACUATION_ZONE"]:
+            color = "green"
+            icon = "home"
+        elif final_plan and asset.id in final_plan.assets_to_evacuate:
+            color = "orange"  # Assets to evacuate
+            icon = "exclamation-sign"
+        else:
+            color = "blue"
+            icon = "info-sign"
 
         folium.Marker(
             location=[lat, lon],
             popup=folium.Popup(popup_html, max_width=300),
-            icon=folium.Icon(color=color, icon="info-sign"),
+            icon=folium.Icon(color=color, icon=icon),
         ).add_to(cluster)
 
     # Add dangers (red markers)
@@ -253,6 +382,26 @@ def create_map_with_data(state: Dict[str, Any]):
             icon=folium.Icon(color="red", icon="exclamation-sign"),
         ).add_to(cluster)
 
+    # Draw evacuation routes if plan exists
+    if final_plan and final_plan.evacuation_zone_assignments:
+        for asset_id, zone_id in final_plan.evacuation_zone_assignments.items():
+            # Find asset and zone coordinates
+            asset = next((a for a in assets if a.id == asset_id), None)
+            zone = next((a for a in assets if a.id == zone_id), None)
+
+            if asset and zone:
+                # Draw line from asset to evacuation zone
+                folium.PolyLine(
+                    locations=[
+                        [asset.location["lat"], asset.location["lon"]],
+                        [zone.location["lat"], zone.location["lon"]],
+                    ],
+                    color="yellow",
+                    weight=3,
+                    opacity=0.7,
+                    popup=f"Evacuation route: {asset_id} → {zone_id}",
+                ).add_to(m)
+
     # Fit bounds to show all markers
     if all_lats and all_lons:
         m.fit_bounds([[min(all_lats), min(all_lons)], [max(all_lats), max(all_lons)]])
@@ -274,18 +423,28 @@ def process_emergency(actors_json: str):
             "",
             "",
             Folium(create_empty_map()),
+            gr.update(choices=[], visible=False),  # ID selector
         )
 
     # Run graph
     result = run_emergency_response(actors_json)
 
     if not result["success"]:
-        return (f"❌ Error: {result['error']}", "", "", "", Folium(create_empty_map()))
+        return (
+            f"❌ Error: {result['error']}",
+            "",
+            "",
+            "",
+            Folium(create_empty_map()),
+            gr.update(choices=[], visible=False),
+        )
 
     state = result["state"]
 
     # Format outputs
-    risk_text = format_risk_assessments(state.get("risk_assessments", []))
+    risk_text = format_risk_assessments(
+        state.get("risk_assessments", []), make_clickable=True
+    )
     route_text = format_route_details(state.get("route_details", []))
     plan_text = format_evacuation_plan(state.get("final_plan"))
 
@@ -300,7 +459,24 @@ def process_emergency(actors_json: str):
     # Create map
     map_obj = create_map_with_data(state)
 
-    return status, risk_text, route_text, plan_text, Folium(map_obj)
+    # Collect all IDs for the dropdown
+    all_ids = []
+    for asset in state.get("assets", []):
+        all_ids.append(asset.id)
+    for danger in state.get("dangers", []):
+        all_ids.append(danger.id)
+
+    # Sort alphabetically
+    all_ids.sort()
+
+    return (
+        status,
+        risk_text,
+        route_text,
+        plan_text,
+        Folium(map_obj),
+        gr.update(choices=all_ids, visible=True, value=None),  # Show ID selector
+    )
 
 
 def load_example_file(filepath: str = "data/actors_japan.yaml") -> str:
@@ -357,6 +533,23 @@ def create_interface():
                 gr.Markdown("### 🗺️ Map Visualization")
                 map_output = Folium(create_empty_map())
 
+                # Add zoom controls
+                with gr.Row():
+                    zoom_dropdown = gr.Dropdown(
+                        choices=[],
+                        label="🔍 Zoom to Location",
+                        interactive=True,
+                        visible=False,
+                    )
+                    zoom_level = gr.Slider(
+                        minimum=10,
+                        maximum=18,
+                        value=15,
+                        step=1,
+                        label="Zoom Level",
+                        visible=False,
+                    )
+
         # Full width: Risk assessment
         with gr.Row():
             with gr.Column():
@@ -408,16 +601,60 @@ def create_interface():
             """)
 
         # Event handlers
+
+        # Store state globally for zoom function
+        current_state = gr.State(value={})
+
+        def handle_zoom(item_id, zoom_val, state_data):
+            """Handle zoom to specific location"""
+            if not item_id or not state_data:
+                return Folium(create_empty_map())
+            return Folium(
+                create_map_centered_on_item(state_data, item_id, int(zoom_val))
+            )
+
         submit_btn.click(
             fn=process_emergency,
             inputs=[input_json],
-            outputs=[status_output, risk_output, route_output, plan_output, map_output],
+            outputs=[
+                status_output,
+                risk_output,
+                route_output,
+                plan_output,
+                map_output,
+                zoom_dropdown,
+            ],
+        ).then(fn=lambda result: result, inputs=[input_json], outputs=[current_state])
+
+        # Zoom functionality
+        zoom_dropdown.change(
+            fn=lambda item_id, zoom_val: handle_zoom(
+                item_id, zoom_val, run_emergency_response(input_json.value)["state"]
+            )
+            if item_id
+            else gr.update(),
+            inputs=[zoom_dropdown, zoom_level],
+            outputs=[map_output],
         )
 
         clear_btn.click(
-            fn=lambda: ("", "", "", "", Folium(create_empty_map())),
+            fn=lambda: (
+                "",
+                "",
+                "",
+                "",
+                Folium(create_empty_map()),
+                gr.update(choices=[], visible=False),
+            ),
             inputs=[],
-            outputs=[status_output, risk_output, route_output, plan_output, map_output],
+            outputs=[
+                status_output,
+                risk_output,
+                route_output,
+                plan_output,
+                map_output,
+                zoom_dropdown,
+            ],
         )
 
         load_example_btn.click(
@@ -434,6 +671,18 @@ def create_interface():
 
 def main():
     """Launch the Gradio application"""
+    import signal
+    import sys
+
+    def signal_handler(sig, frame):
+        print("\n\n" + "=" * 80)
+        print("🛑 Program closed by user (Ctrl+C)")
+        print("=" * 80)
+        print("👋 Goodbye!\n")
+        sys.exit(0)
+
+    # Register signal handler
+    signal.signal(signal.SIGINT, signal_handler)
 
     # Check environment variables
     required_vars = ["OPENAI_API_KEY", "LANGSMITH_API_KEY"]
@@ -455,9 +704,19 @@ def main():
     print("\n📊 LangSmith Project: emergency-assistant")
     print("💾 Checkpoints: checkpoints/gradio_emergency.db")
     print("🗺️  Map: Folium with dark theme")
-    print("🌐 Opening browser...\n")
+    print("🌐 Opening browser...")
+    print("\n💡 Press Ctrl+C to stop the server\n")
 
-    app.launch(server_name="127.0.0.1", server_port=7860, share=False, show_error=True)
+    try:
+        app.launch(
+            server_name="127.0.0.1", server_port=7860, share=False, show_error=True
+        )
+    except KeyboardInterrupt:
+        print("\n\n" + "=" * 80)
+        print("🛑 Program closed by user (Ctrl+C)")
+        print("=" * 80)
+        print("👋 Goodbye!\n")
+        sys.exit(0)
 
 
 if __name__ == "__main__":
