@@ -109,7 +109,7 @@ def format_risk_assessments(risk_assessments, make_clickable=False) -> str:
         output += "#### High-Risk Situations:\n"
         for r in high:
             if make_clickable:
-                output += f"- `{r.asset_id}` threatened by `{r.danger_id}` ({r.distance_km:.2f} km) [🔍 Click IDs below to zoom]\n"
+                output += f"- `{r.asset_id}` threatened by `{r.danger_id}` ({r.distance_km:.2f} km)\n"
             else:
                 output += f"- `{r.asset_id}` threatened by `{r.danger_id}` ({r.distance_km:.2f} km)\n"
 
@@ -169,8 +169,6 @@ def format_evacuation_plan(plan) -> str:
     output += f"\n#### Helper Assets ({len(plan.helpers)})\n"
     for helper_id in plan.helpers:
         output += f"- {helper_id}\n"
-
-    output += f"\n#### Reasoning\n{plan.reasoning}\n"
 
     return output
 
@@ -295,9 +293,6 @@ def create_map_centered_on_item(state: Dict[str, Any], item_id: str, zoom: int =
                 ).add_to(m)
 
     return m
-    """Create an empty Folium map centered on Valencia"""
-    m = folium.Map(location=ORIGIN_COORDS, zoom_start=10, tiles="cartodbdark_matter")
-    return m
 
 
 def create_map_with_data(state: Dict[str, Any]):
@@ -305,6 +300,18 @@ def create_map_with_data(state: Dict[str, Any]):
     assets = state.get("assets", [])
     dangers = state.get("dangers", [])
     final_plan = state.get("final_plan")
+    route_details = state.get("route_details") or []
+
+    # # DEBUG: Print what we have
+    # print(f"🔍 DEBUG - Route details count: {len(route_details)}")
+    # if route_details:
+    #     print(f"🔍 DEBUG - First route: {route_details[0]}")
+    #     print(f"🔍 DEBUG - Has geometry: {'route_geometry' in route_details[0]}")
+
+    # print(f"🔍 DEBUG - Final plan exists: {final_plan is not None}")
+    # if final_plan:
+    #     print(f"🔍 DEBUG - Evacuation assignments: {final_plan.evacuation_zone_assignments}")
+    # ### end
 
     if not assets and not dangers:
         return create_empty_map()
@@ -385,21 +392,19 @@ def create_map_with_data(state: Dict[str, Any]):
     # Draw evacuation routes if plan exists
     if final_plan and final_plan.evacuation_zone_assignments:
         for asset_id, zone_id in final_plan.evacuation_zone_assignments.items():
-            # Find asset and zone coordinates
-            asset = next((a for a in assets if a.id == asset_id), None)
-            zone = next((a for a in assets if a.id == zone_id), None)
+            # Find route details for this asset
+            route_detail = next(
+                (r for r in route_details if r["asset_id"] == asset_id), None
+            )
 
-            if asset and zone:
-                # Draw line from asset to evacuation zone
+            if route_detail and route_detail.get("route_geometry"):
+                # Draw actual OSRM route (curved road path)
                 folium.PolyLine(
-                    locations=[
-                        [asset.location["lat"], asset.location["lon"]],
-                        [zone.location["lat"], zone.location["lon"]],
-                    ],
+                    locations=route_detail["route_geometry"],  # Actual road path!
                     color="yellow",
-                    weight=3,
-                    opacity=0.7,
-                    popup=f"Evacuation route: {asset_id} → {zone_id}",
+                    weight=4,
+                    opacity=0.8,
+                    popup=f"Evacuation route: {asset_id} → {zone_id}<br>Distance: {route_detail['route_distance_km']} km<br>Time: {route_detail['estimated_time_minutes']} min",
                 ).add_to(m)
 
     # Fit bounds to show all markers
@@ -422,8 +427,9 @@ def process_emergency(actors_json: str):
             "",
             "",
             "",
+            "",  # ← NEW: reasoning
             Folium(create_empty_map()),
-            gr.update(choices=[], visible=False),  # ID selector
+            gr.update(choices=[], visible=False),
         )
 
     # Run graph
@@ -435,6 +441,7 @@ def process_emergency(actors_json: str):
             "",
             "",
             "",
+            "",  # ← NEW: reasoning
             Folium(create_empty_map()),
             gr.update(choices=[], visible=False),
         )
@@ -446,7 +453,15 @@ def process_emergency(actors_json: str):
         state.get("risk_assessments", []), make_clickable=True
     )
     route_text = format_route_details(state.get("route_details", []))
-    plan_text = format_evacuation_plan(state.get("final_plan"))
+
+    # Split plan and reasoning
+    final_plan = state.get("final_plan")
+    plan_text = format_evacuation_plan(final_plan)
+    reasoning_text = (
+        f"**Reasoning:**\n\n{final_plan.reasoning}"
+        if final_plan and final_plan.reasoning
+        else "No reasoning available"
+    )
 
     # Status message
     if state.get("error"):
@@ -474,8 +489,9 @@ def process_emergency(actors_json: str):
         risk_text,
         route_text,
         plan_text,
+        reasoning_text,  # ← NEW: separate reasoning
         Folium(map_obj),
-        gr.update(choices=all_ids, visible=True, value=None),  # Show ID selector
+        gr.update(choices=all_ids, visible=True, value=None),
     )
 
 
@@ -501,17 +517,17 @@ def create_interface():
         AI-powered emergency decision-making system using LangGraph
         """)
 
-        # Top row: Input and Map side by side
-        with gr.Row():
+        # Top row: Input and Map side by side (EQUAL HEIGHT)
+        with gr.Row(equal_height=True):
             # Left column: Input data
             with gr.Column(scale=1):
-                gr.Markdown("### 📝 Input Data")
+                gr.Markdown("### 📋 Input Data")
 
                 input_json = gr.Code(
                     label="Emergency Scenario (YAML or JSON)",
                     language="yaml",
-                    lines=20,
-                    max_lines=20,
+                    lines=30,  # ← INCREASED from 20 to 30
+                    max_lines=30,  # ← INCREASED from 20 to 30
                     value=load_example_file(),
                 )
 
@@ -524,16 +540,12 @@ def create_interface():
 
                 status_output = gr.Markdown(label="Status")
 
-                # Route analysis under input
-                gr.Markdown("### 🛣️ Route Analysis")
-                route_output = gr.Markdown(label="Evacuation Routes")
-
-            # Right column: Map visualization
+            # Right column: Map visualization (EQUAL HEIGHT)
             with gr.Column(scale=1):
                 gr.Markdown("### 🗺️ Map Visualization")
-                map_output = Folium(create_empty_map())
+                map_output = Folium(create_empty_map(), height=600)  # ← ADD HEIGHT
 
-                # Add zoom controls
+                # Zoom controls
                 with gr.Row():
                     zoom_dropdown = gr.Dropdown(
                         choices=[],
@@ -550,17 +562,26 @@ def create_interface():
                         visible=False,
                     )
 
-        # Full width: Risk assessment
+        # Second row: Route Analysis and Risk/Plan (TWO COLUMNS)
         with gr.Row():
-            with gr.Column():
+            # Left column: Route Analysis
+            with gr.Column(scale=1):
+                gr.Markdown("### 🛣️ Route Analysis")
+                route_output = gr.Markdown(label="Evacuation Routes")
+
+            # Right column: Risk Assessment + Evacuation Plan
+            with gr.Column(scale=1):
                 gr.Markdown("### 🎯 Risk Assessment")
                 risk_output = gr.Markdown(label="Risk Summary")
 
-        # Full width: Evacuation plan
-        with gr.Row():
-            with gr.Column():
                 gr.Markdown("### 📋 Evacuation Plan")
                 plan_output = gr.Markdown(label="Final Plan")
+
+        # Third row: Reasoning (FULL WIDTH)
+        with gr.Row():
+            with gr.Column():
+                gr.Markdown("### 💭 Reasoning")
+                reasoning_output = gr.Markdown(label="Plan Reasoning")
 
         # Collapsible instructions
         with gr.Accordion("ℹ️ How to Use", open=False):
@@ -596,13 +617,12 @@ def create_interface():
             - 🔵 Blue markers: Assets (protected resources)
             - 🟢 Green markers: Safe places / Evacuation zones
             - 🔴 Red markers: Dangers (threats)
+            - 🟡 Yellow lines: Evacuation routes
 
             View detailed traces in [LangSmith](https://smith.langchain.com/)
             """)
 
         # Event handlers
-
-        # Store state globally for zoom function
         current_state = gr.State(value={})
 
         def handle_zoom(item_id, zoom_val, state_data):
@@ -621,6 +641,7 @@ def create_interface():
                 risk_output,
                 route_output,
                 plan_output,
+                reasoning_output,  # ← NEW OUTPUT
                 map_output,
                 zoom_dropdown,
             ],
@@ -643,6 +664,7 @@ def create_interface():
                 "",
                 "",
                 "",
+                "",  # ← NEW: reasoning output
                 Folium(create_empty_map()),
                 gr.update(choices=[], visible=False),
             ),
@@ -652,6 +674,7 @@ def create_interface():
                 risk_output,
                 route_output,
                 plan_output,
+                reasoning_output,  # ← NEW OUTPUT
                 map_output,
                 zoom_dropdown,
             ],

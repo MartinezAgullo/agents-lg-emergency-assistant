@@ -47,33 +47,98 @@ def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
 
 @traceable(name="calculate_route_distance")
 def calculate_route_distance(
-    lat1: float, lon1: float, lat2: float, lon2: float, provider: str = "osrm"
-) -> float:
+    lat1: float,
+    lon1: float,
+    lat2: float,
+    lon2: float,
+    provider: str = "osrm",
+    profile: str = "driving",
+) -> tuple[float, list]:
     """
     Calculate actual road/walking distance between two points using routing APIs.
 
-    This function will be implemented in the future to provide realistic evacuation
-    route distances instead of straight-line distances.
-
-    Providers under consideration:
-    - osrm (Open Source Routing Machine) <--- MOST PROBABLY WE WILL BE USING THIS
-    - google_maps (Google Maps Distance Matrix API)
-    - graphhopper
-    - valhalla
+    Uses OSRM (Open Source Routing Machine) public API to get realistic evacuation
+    route distances and geometry for map rendering.
 
     Args:
         lat1, lon1: Start point coordinates
         lat2, lon2: End point coordinates
-        provider: Routing service to use
+        provider: Routing service to use (currently only "osrm" implemented)
+        profile: Transportation mode - "driving", "walking", or "cycling" (default: "driving")
 
     Returns:
-        Route distance in kilometers
+        Tuple of (distance_km, route_geometry)
+        - distance_km: Route distance in kilometers
+        - route_geometry: List of [lat, lon] coordinate pairs for the route path
 
-    TODO: Implement routing API integration
+    Raises:
+        ValueError: If profile is not one of the valid options
+        NotImplementedError: If provider other than "osrm" is specified
+        Exception: If OSRM API call fails, falls back to Haversine
     """
-    raise NotImplementedError(
-        "Route distance calculation not yet implemented. Use calculate_distance() for now."
-    )
+    if provider != "osrm":
+        raise NotImplementedError(f"Provider '{provider}' not implemented. Use 'osrm'.")
+
+    # Validate profile parameter
+    valid_profiles = ["driving", "walking", "cycling"]
+    if profile not in valid_profiles:
+        raise ValueError(
+            f"Invalid profile '{profile}'. Must be one of: {', '.join(valid_profiles)}"
+        )
+
+    try:
+        # OSRM public API endpoint (free, no auth required)
+        # Format: /route/v1/{profile}/{coordinates}
+        osrm_url = f"http://router.project-osrm.org/route/v1/{profile}/{lon1},{lat1};{lon2},{lat2}"
+
+        params = {
+            "overview": "full",  # Get full route geometry
+            "geometries": "geojson",  # Return geometry as GeoJSON (lat/lon pairs)
+            "steps": "false",  # Don't need turn-by-turn instructions
+        }
+
+        response = requests.get(osrm_url, params=params, timeout=10)
+        response.raise_for_status()
+
+        data = response.json()
+
+        if data.get("code") != "Ok":
+            raise Exception(f"OSRM API error: {data.get('code')}")
+
+        # Extract route information
+        route = data["routes"][0]
+        distance_m = route["distance"]  # Distance in meters
+        distance_km = distance_m / 1000.0  # Convert to kilometers
+
+        # Extract geometry (list of [lon, lat] pairs in GeoJSON format)
+        geometry_geojson = route["geometry"]["coordinates"]
+
+        # Convert from GeoJSON [lon, lat] to Folium [lat, lon] format
+        route_geometry = [[coord[1], coord[0]] for coord in geometry_geojson]
+
+        return distance_km, route_geometry
+
+    except requests.exceptions.Timeout:
+        print(
+            f"⚠️ OSRM API timeout (profile: {profile}) - falling back to Haversine distance"
+        )
+        haversine_dist = calculate_distance(lat1, lon1, lat2, lon2)
+        # Return straight line as geometry (fallback)
+        return haversine_dist, [[lat1, lon1], [lat2, lon2]]
+
+    except requests.exceptions.RequestException as e:
+        print(
+            f"⚠️ OSRM API error (profile: {profile}): {e} - falling back to Haversine distance"
+        )
+        haversine_dist = calculate_distance(lat1, lon1, lat2, lon2)
+        return haversine_dist, [[lat1, lon1], [lat2, lon2]]
+
+    except Exception as e:
+        print(
+            f"⚠️ Unexpected error in route calculation (profile: {profile}): {e} - falling back to Haversine"
+        )
+        haversine_dist = calculate_distance(lat1, lon1, lat2, lon2)
+        return haversine_dist, [[lat1, lon1], [lat2, lon2]]
 
 
 # ==================== RISK ASSESSMENT ====================

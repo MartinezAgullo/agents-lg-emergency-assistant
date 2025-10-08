@@ -36,10 +36,10 @@ def propose_plan(state: GraphState) -> Dict[str, Any]:
     You are an emergency response coordinator. Based on the following information, create an evacuation plan.
 
     ASSETS:
-    {[{"id": a.id, "type": a.type, "location": a.location} for a in assets]}
+    {[{"id": a.id, "type": a.type, "location": a.location, "comments": a.comments} for a in assets]}
 
     DANGERS:
-    {[{"id": d.id, "type": d.type, "location": d.location} for d in dangers]}
+    {[{"id": d.id, "type": d.type, "location": d.location, "severity": getattr(d, 'severity', 'unknown'), "comments": d.comments} for d in dangers]}
 
     RISK ASSESSMENTS:
     {[{"asset": r.asset_id, "danger": r.danger_id, "distance_km": r.distance_km, "risk": r.risk_level} for r in risk_assessments]}
@@ -48,6 +48,7 @@ def propose_plan(state: GraphState) -> Dict[str, Any]:
     # Add route details if available
     if route_details:
         prompt += f"""
+
         EVACUATION ROUTES (actual road distances and times):
         {[{
             "asset": r["asset_id"],
@@ -61,41 +62,98 @@ def propose_plan(state: GraphState) -> Dict[str, Any]:
         AVAILABLE EVACUATION ZONES:
         {[{"id": a.id, "type": a.type, "location": a.location, "comments": a.comments} for a in assets if a.type == "EVACUATION_ZONE"]}
 
+        Generate a comprehensive evacuation plan with TWO parts:
 
-        Generate an evacuation plan that:
-        1.  **Prioritizes Evacuation:** **Immediately identifies and lists** all assets that are at **High** or **Medium** risk (based on `risk_assessments`) and must be evacuated. For each, state the **primary danger** and the **specific reason** for evacuation, citing relevant context (e.g., asset type, danger severity, comments).
-            Do NOT include EVACUATION_ZONE assets in the evacuation list - these are safe destinations, not assets to evacuate!
+        ## PART 1: plan_schematic (Visual Action Plan)
+        Create a concise, scannable schematic using this format:
 
-        2.  **Assigns Optimal Evacuation Zones:** For each asset to evacuate, **select the most appropriate evacuation zone** considering:
-            - Distance and travel time (prefer closer zones for urgent evacuations)
-            - Zone capacity and features (from comments: "medical facilities", "capacity")
-            - Danger proximity (NEVER assign to zones near active dangers)
-            - Route feasibility (prefer "feasible" routes over "challenging" or "critical")
-            - Multiple assets can go to the same zone if it makes sense
+        🚨 PRIORITY 1 - IMMEDIATE (0-15 min)
+        └─ [EVACUATE] asset_id → evacuation_zone (X.X km, XX min)
+           ├─ Danger: danger_type at X.X km
+           └─ Action: Brief specific action
 
-        3.  **Identifies Critical Assets:** Assesses assets with sensitive material (e.g., "Nuclear power plant," "Very sensible material" from `comments`) and determines if they need **protection or evacuation**. If they are deemed helper assets (like a hospital or police station), ensure they are **secured before or during** their deployment.
+        🔴 PRIORITY 2 - URGENT (15-30 min)
+        └─ [EVACUATE] asset_id → evacuation_zone (X.X km, XX min)
+           └─ Action: Brief specific action
 
-        4.  **Proposes Strategic Helpers:** Identifies potential **Helper Assets** (e.g., fire station, police, hospitals, or any asset not being evacuated) that are **closest** to the most critical evacuation/danger points. Specify the **role** they should play (e.g., "Police to secure high-security perimeter," "Fire Station to manage Fire ad88377c").
-            Depending on the situation, some assets may be evacuated by themselves others may need help.
-            Depending on the situation, a single assset can be a helper or a evacuee.
+        🟡 PRIORITY 3 - HIGH (30-60 min)
+        └─ [PROTECT] asset_id
+           └─ Action: Brief specific action
 
-        5.  **Defines Actionable Steps:** For the highest priority evacuation, proposes a brief, **sequential action plan** (e.g., "1. Notify local police. 2. Begin controlled shutdown of X. 3. Deploy Z units to Y.")
+        🚑 HELPER DEPLOYMENT
+        ├─ helper_id: Specific role (e.g., "Secure perimeter at asset_x")
+        └─ helper_id: Specific role
 
-        6.  **Analyzes Danger Context:** Explicitly integrates information from the **danger comments** (e.g., "Storm traveling to the north-east direction," "High flood risk") into the plan's justification, ensuring the plan accounts for changing or blocking access routes.
-            Provides clear reasoning for your decisions
+        ⚠️ CRITICAL NOTES
+        • Any time-sensitive constraints
+        • Weather/danger movement considerations
+        • Coordination requirements
+
+        Requirements for schematic:
+        - Use tree characters (└─, ├─) for visual hierarchy
+        - Include distances and times for evacuations
+        - Prioritize by urgency (immediate/urgent/high)
+        - Assign specific roles to each helper
+        - Keep each line under 80 characters
+        - Use emojis for quick visual scanning
+
+        ## PART 2: reasoning (Detailed Analysis)
+        Provide comprehensive reasoning covering:
+
+        1. **Threat Analysis:**
+           - Primary dangers and their movement/evolution
+           - Which assets are most vulnerable and why
+           - Time-critical factors influencing decisions
+
+        2. **Evacuation Strategy:**
+           - Why specific evacuation zones were chosen for each asset
+           - Route selection rationale (distance vs. safety vs. capacity)
+           - Priority ordering justification
+
+        3. **Helper Deployment Logic:**
+           - Why each helper was chosen for their role
+           - Coordination between multiple helpers
+           - Backup plans if helpers are unavailable
+
+        4. **Risk Mitigation:**
+           - How the plan addresses high-risk scenarios
+           - Contingencies for route blockages or zone capacity issues
+           - Special considerations for sensitive assets
+
+        5. **Timeline Justification:**
+           - Why specific timeframes were assigned
+           - Dependencies between evacuation steps
+           - Critical path analysis
+
+        ## General Requirements:
+        1. **Prioritize Evacuation:** Identify all assets at High or Medium risk
+           - Do NOT include EVACUATION_ZONE assets in evacuation list!
+
+        2. **Assign Optimal Evacuation Zones:** Consider:
+           - Distance and travel time (prefer closer for urgent)
+           - Zone capacity and features
+           - Danger proximity (NEVER assign to zones near dangers)
+           - Route feasibility (prefer "feasible" over "challenging")
+           - Multiple assets can share zones if appropriate
+
+        3. **Identify Critical Assets:** Assess sensitive materials and determine protection needs
+
+        4. **Strategic Helper Deployment:** Assign specific, actionable roles
+
+        5. **Quality Score:** Self-assess effectiveness (0.0-1.0)
         """  # nosec
-    # 7.  **Assigns Quality Score:** Assigns a quality score (**0.0-1.0**) based on how effectively the plan addresses the **High Severity** dangers and protects the most **sensitive assets**.
-
     else:
         prompt += """
-        Generate an evacuation plan that:
-        1.  **Prioritizes Evacuation:** Identifies all assets at High or Medium risk and must be evacuated.
-            Do NOT include EVACUATION_ZONE assets in the evacuation list!
-        2.  **Identifies Critical Assets:** Assesses sensitive assets and determines protection needs.
-        3.  **Proposes Strategic Helpers:** Identifies helper assets closest to critical points.
-        4.  **Provides clear reasoning** for your decisions.
-        5.  **Assigns a quality score** (0.0-1.0) based on plan effectiveness
+
+        Generate an evacuation plan with a schematic and detailed reasoning:
+
+        1. **plan_schematic:** Visual tree-style action plan with priorities, distances, and specific actions
+        2. **reasoning:** Detailed analysis of threats, strategy, and decision-making
+        3. **Prioritize Evacuation:** Identify all High/Medium risk assets (NOT evacuation zones!)
+        4. **Assign helpers** with specific roles
+        5. **Quality score** (0.0-1.0) based on effectiveness
         """
+
     # Add feedback if this is a retry
     if evaluation_feedback:
         prompt += f"""
@@ -103,7 +161,7 @@ def propose_plan(state: GraphState) -> Dict[str, Any]:
         PREVIOUS EVALUATION FEEDBACK:
         {evaluation_feedback}
 
-        Please improve the plan based on this feedback.
+        Please improve the plan based on this feedback. Pay special attention to addressing the specific concerns raised.
         """
 
     # Generate plan

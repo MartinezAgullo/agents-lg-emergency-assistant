@@ -81,6 +81,9 @@ class EvacuationPlan(BaseModel):
     )
     helpers: List[str]  # Actors assigned to assist
     plan_quality_score: float  # For self-evaluation
+    plan_schematic: str = Field(
+        description="Visual schematic summary of the plan with numbered steps, priorities, and timeline. Must be concise and easy to scan."
+    )
     reasoning: str
 
 

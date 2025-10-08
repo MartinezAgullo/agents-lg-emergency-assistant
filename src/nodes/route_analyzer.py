@@ -22,10 +22,10 @@ def find_nearest_safe_location(
 
     Args:
         asset_lat, asset_lon: Asset coordinates
-        safe_places: List of SafePlace assets
+        safe_places: List of SafePlace or EVACUATION_ZONE assets
 
     Returns:
-        (safe_place_id, distance_km, route_distance_km) or None
+        (safe_place_id, straight_distance_km, route_distance_km, route_geometry) or None
     """
     if not safe_places:
         return None
@@ -33,6 +33,7 @@ def find_nearest_safe_location(
     best_safe_place = None
     min_distance = float("inf")
     route_distance = None
+    route_geometry = None
 
     for safe_place in safe_places:
         # Calculate straight-line distance first
@@ -43,22 +44,33 @@ def find_nearest_safe_location(
         if straight_distance < min_distance:
             # Calculate actual route distance for the closest candidate
             try:
-                actual_route = calculate_route_distance(
+                actual_route, route_geom = calculate_route_distance(
                     asset_lat,
                     asset_lon,
                     safe_place.location["lat"],
                     safe_place.location["lon"],
+                    profile="driving",  # Use driving profile for evacuations
                 )
                 min_distance = straight_distance
                 route_distance = actual_route
+                route_geometry = route_geom
                 best_safe_place = safe_place.id
-            except NotImplementedError:
-                # Fallback to Haversine if OSRM not implemented
+            except (NotImplementedError, ValueError, Exception) as e:
+                # Fallback to Haversine if OSRM fails
+                print(f"⚠️ Route calculation failed: {e}, using Haversine fallback")
                 min_distance = straight_distance
                 route_distance = straight_distance
+                route_geometry = [
+                    [asset_lat, asset_lon],
+                    [safe_place.location["lat"], safe_place.location["lon"]],
+                ]
                 best_safe_place = safe_place.id
 
-    return (best_safe_place, min_distance, route_distance) if best_safe_place else None
+    return (
+        (best_safe_place, min_distance, route_distance, route_geometry)
+        if best_safe_place
+        else None
+    )
 
 
 def analyze_evacuation_routes(state: GraphState) -> Dict[str, Any]:
@@ -73,6 +85,7 @@ def analyze_evacuation_routes(state: GraphState) -> Dict[str, Any]:
     2. Calculates actual route distance (vs straight-line)
     3. Estimates evacuation time
     4. Provides route feasibility assessment
+    5. Stores route geometry for map rendering
 
     Args:
         state: Current graph state with risk assessments
@@ -87,8 +100,8 @@ def analyze_evacuation_routes(state: GraphState) -> Dict[str, Any]:
     # Filter for high and medium risk assets
     at_risk = [r for r in risk_assessments if r.risk_level in ["high", "medium"]]
 
-    # Identify safe places from assets
-    safe_places = [a for a in assets if a.type == "SafePlace"]
+    # Identify safe places from assets (SafePlace or EVACUATION_ZONE)
+    safe_places = [a for a in assets if a.type in ["SafePlace", "EVACUATION_ZONE"]]
 
     route_details = []
 
@@ -106,7 +119,9 @@ def analyze_evacuation_routes(state: GraphState) -> Dict[str, Any]:
         )
 
         if safe_location_info:
-            safe_place_id, straight_distance, route_distance = safe_location_info
+            safe_place_id, straight_distance, route_distance, route_geometry = (
+                safe_location_info
+            )
 
             # Estimate evacuation time
             # Assumptions:
@@ -134,6 +149,7 @@ def analyze_evacuation_routes(state: GraphState) -> Dict[str, Any]:
                 "feasibility": _assess_route_feasibility(
                     route_distance, travel_time_minutes
                 ),
+                "route_geometry": route_geometry,  # NEW: Geometry for map rendering
             }
         else:
             # No safe place found - use fallback assessment
@@ -147,6 +163,7 @@ def analyze_evacuation_routes(state: GraphState) -> Dict[str, Any]:
                 "estimated_time_minutes": None,
                 "route_efficiency": None,
                 "feasibility": "no_safe_location",
+                "route_geometry": None,
             }
 
         route_details.append(route_detail)

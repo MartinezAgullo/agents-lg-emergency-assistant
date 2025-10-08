@@ -20,11 +20,11 @@ Emergency Assistant analyzes threats (fires, storms, terrorist attacks) and auto
 ## 🏗️ Architecture
 
 ```
-START → Parser → Analyzer → Proposer → Evaluator → [Plan OK?]
-                                            ↓ No
-                                         Proposer (retry with feedback)
-                                            ↓ Yes
-                                         Notifier → END
+START → Parser → Analyzer → RouteAnalyzer → Proposer → Evaluator → [Plan OK?]
+                                                            ↓ No
+                                                         Proposer (retry)
+                                                            ↓ Yes
+                                                         Notifier → END
 ```
 
 ## 🚀 Quick Start

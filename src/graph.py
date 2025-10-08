@@ -5,6 +5,8 @@ from typing import Literal
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, StateGraph
 
+from src.nodes.route_analyzer import analyze_evacuation_routes
+
 from .nodes.analyzer import analyze_risks
 from .nodes.evaluator import evaluate_plan
 from .nodes.notifier import send_notifications
@@ -34,13 +36,15 @@ def create_emergency_graph() -> StateGraph:
     # Add nodes
     graph_builder.add_node("parser", parse_input)
     graph_builder.add_node("analyzer", analyze_risks)
+    graph_builder.add_node("route_analyzer", analyze_evacuation_routes)
     graph_builder.add_node("proposer", propose_plan)
     graph_builder.add_node("evaluator", evaluate_plan)
     graph_builder.add_node("notifier", send_notifications)
 
     # Define normal edges
     graph_builder.add_edge("parser", "analyzer")
-    graph_builder.add_edge("analyzer", "proposer")
+    graph_builder.add_edge("analyzer", "route_analyzer")
+    graph_builder.add_edge("route_analyzer", "proposer")
     graph_builder.add_edge("proposer", "evaluator")
 
     # Conditional edge: after evaluator

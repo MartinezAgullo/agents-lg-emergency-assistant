@@ -12,33 +12,38 @@ def send_notifications(state: GraphState) -> Dict[str, Any]:
 
     Uses Pushover to send alerts to emergency coordinators with
     the approved evacuation plan details.
+
+    Note: Sends the concise schematic, NOT the detailed reasoning.
     """
 
     proposed_plan = state["proposed_plan"]
 
-    # Prepare notification message
+    # Prepare notification message with schematic (not reasoning)
     message = f"""🚨 EMERGENCY EVACUATION PLAN APPROVED
 
-📍 ASSETS TO EVACUATE:
+
+
+{proposed_plan.plan_schematic}
+
+📍 ASSETS TO EVACUATE ({len(proposed_plan.assets_to_evacuate)}):
 {', '.join(proposed_plan.assets_to_evacuate) if proposed_plan.assets_to_evacuate else 'None'}
 
-🚑 HELPER ASSETS DEPLOYED:
+🚑 HELPER ASSETS ({len(proposed_plan.helpers)}):
 {', '.join(proposed_plan.helpers) if proposed_plan.helpers else 'None'}
 
-📊 PLAN QUALITY SCORE: {proposed_plan.plan_quality_score:.2f}
+📊 QUALITY SCORE: {proposed_plan.plan_quality_score:.2f}
 
-💡 REASONING:
-{proposed_plan.reasoning}
-
-⚠️ Take immediate action according to this plan.
+⚠️ EXECUTE IMMEDIATELY - Lives at risk
+View full reasoning at command center
 """
 
     # Send notification via Pushover
     try:
         success = send_pushover_notification(
             message=message,
-            title="Emergency Evacuation Plan",
+            title="🚨 Emergency Evacuation Plan",
             priority=1,  # High priority
+            sound="siren",  # Use urgent sound
         )
 
         return {
