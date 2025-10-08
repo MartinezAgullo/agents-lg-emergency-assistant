@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 from langchain_openai import ChatOpenAI
 
+from ..config import PROPOSER_TEMPERATURE
 from ..state import EvacuationPlan, GraphState
 
 
@@ -20,7 +21,9 @@ def propose_plan(state: GraphState) -> Dict[str, Any]:
 
     # Initialize LLM with structured output
     llm = ChatOpenAI(
-        model="gpt-4o-mini", temperature=0.7, api_key=os.getenv("OPENAI_API_KEY")
+        model="gpt-4o-mini",
+        temperature=PROPOSER_TEMPERATURE,
+        api_key=os.getenv("OPENAI_API_KEY"),
     ).with_structured_output(EvacuationPlan)
 
     # Prepare context

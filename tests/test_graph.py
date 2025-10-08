@@ -27,7 +27,7 @@ os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "emergency-assistant-test"
 
 
-def load_actors_data(filepath: str = "data/actors_valencia.yaml") -> dict:
+def load_actors_data(filepath: str = "data/actors_japan.yaml") -> dict:
     """Load actors data from YAML file"""
     with open(filepath, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)

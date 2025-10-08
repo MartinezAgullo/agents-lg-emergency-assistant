@@ -10,7 +10,8 @@ Emergency Assistant analyzes threats (fires, storms, terrorist attacks) and auto
 
 - 🤖 **Multi-Agent Architecture**: Parser → Analyzer → Proposer → Evaluator workflow
 - 📍 **Geospatial Risk Assessment**: Calculates threat proximity and risk levels for each asset
-- 🔄 **Self-Improving Plans**: Iterative plan refinement until quality threshold is met
+- 🔄 **Self-Improving Plans**: Iterative plan refinement until quality threshold is met:
+   - Several sub evaluators specialists.
 - 📲 **Push Notifications**: Real-time alerts via [Pushover](https://pushover.net/)
 - 💾 **Persistent Checkpoints**: SQLite-based state management for reliability
 - 📊 **Full Observability**: Integrated LangSmith tracing
@@ -20,11 +21,51 @@ Emergency Assistant analyzes threats (fires, storms, terrorist attacks) and auto
 ## 🏗️ Architecture
 
 ```
-START → Parser → Analyzer → RouteAnalyzer → Proposer → Evaluator → [Plan OK?]
-                                                            ↓ No
-                                                         Proposer (retry)
-                                                            ↓ Yes
-                                                         Notifier → END
+              ┌────────────────────────────────────────┐
+              │                 Parser                 │
+              └────────────────────────────────────────┘
+                                   │
+                                   ▼
+              ┌────────────────────────────────────────┐
+              │                 Analyzer               │
+              └────────────────────────────────────────┘
+                                   │
+                                   ▼
+              ┌────────────────────────────────────────┐
+              │             RouteAnalyzer              │
+              └────────────────────────────────────────┘
+                                   │
+                                   ▼
+              ┌────────────────────────────────────────┐
+              │                 Proposer               │
+              │     (generates an initial or revised plan) │
+              └────────────────────────────────────────┘
+                                   │
+             ┌────────────────────┴────────────────────┐
+             │                   │                     │
+             ▼                   ▼                     ▼
+┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
+│ Operational_Eval   │ │    Social_Eval     │ │   Economic_Eval    │
+│  (strict ≥ 0.6)    │ │  (lenient ≥ 0.5)   │ │  (lenient ≥ 0.5)   │
+└────────────────────┘ └────────────────────┘ └────────────────────┘
+             │                   │                     │
+             └───────────────────┴─────────────────────┘
+                                   │
+                                   ▼
+              ┌────────────────────────────────────────┐
+              │             Meta_Evaluator             │
+              │  (synthesis of the three evaluations)  │
+              └────────────────────────────────────────┘
+                                   │
+                         ┌────────┴────────┐
+                         ▼                 ▼
+        ┌────────────────────────┐  ┌────────────────────────┐
+        │        Notifier        │  │        Proposer        │
+        │ (plan approved, alert) │  │ (retries with improvements) │
+        └────────────────────────┘  └────────────────────────┘
+                         │                 │
+                         └───────► Iterative Cycle ◄───────┘
+
 ```
 
 ## 🚀 Quick Start
@@ -34,7 +75,10 @@ START → Parser → Analyzer → RouteAnalyzer → Proposer → Evaluator → [
 uv sync
 
 # for test
+uv run python tests/test_yaml.py
+uv run python tests/test_firewall.py
 uv run python tests/test_graph.py
+
 
 
 # Run the application
@@ -51,31 +95,33 @@ Proposed project scaffolding
 │   └── actors_valencia.yaml
 ├── main.py
 ├── pyproject.toml
-├── src
-│   ├── firewall.py
-│   ├── graph.py
-│   ├── nodes
-│   │   ├── analyzer.py
-│   │   ├── evaluator.py
-│   │   ├── notifier.py
-│   │   ├── parser.py
-│   │   ├── proposer.py
-│   │   └── route_analyzer.py
-│   ├── state.py
-│   └── tools.py
-└── tests
-    ├── test_firewall.py
-    ├── test_graph.py
+└── src
+    ├── config.py
+    ├── firewall.py
+    ├── graph.py
+    ├── nodes
+    │   ├── analyzer.py
+    │   ├── evaluator_economic.py
+    │   ├── evaluator_meta.py
+    │   ├── evaluator_operational.py
+    │   ├── evaluator_social.py
+    │   ├── notifier.py
+    │   ├── parser.py
+    │   ├── proposer.py
+    │   └── route_analyzer.py
+    ├── state.py
+    └── tools.py
     └── test_yaml.py
 ```
 ## Interface
+Gradio interface before loading an scenario:
     <figure style="margin: 0;">
         <img src="https://github.com/MartinezAgullo/agents-lg-emergency-assistant/blob/main/data/gradio_0_empty.png" alt="Gradio interface" style="width: 100%; max-width: 400px; display: block;">
     </figure>
 
-The evacuation routes are displayed as well
+Evacuation routes for an emergency scenario:
     <figure style="margin: 0;">
-        <img src="https://github.com/MartinezAgullo/agents-lg-emergency-assistant/blob/main/data/gradio_a_maps.png" alt="Gradio interface" style="width: 100%; max-width: 400px; display: block;">
+        <img src="https://github.com/MartinezAgullo/agents-lg-emergency-assistant/blob/main/data/gradio_a_maps.png" alt="Routes" style="width: 100%; max-width: 400px; display: block;">
     </figure>
 
 

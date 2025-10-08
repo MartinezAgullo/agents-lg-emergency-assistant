@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: E402, F821
 """
 Emergency Assistant - Gradio Interface
 
@@ -7,12 +8,23 @@ Provides interactive map visualization and plan generation.
 """
 
 import os
+
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Setup LangSmith tracing - MUST be before LangChain imports
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_PROJECT"] = "emergency-assistant"
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+
+
 from pathlib import Path
 from typing import Any, Dict
 
 import folium
 import gradio as gr
-from dotenv import load_dotenv
 from folium.plugins import MarkerCluster
 from gradio_folium import Folium
 from langgraph.checkpoint.sqlite import SqliteSaver
@@ -20,12 +32,19 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from src.graph import compile_graph
 from src.state import GraphState
 
-# Load environment variables
-load_dotenv()
-
 # Setup LangSmith tracing
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "emergency-assistant"
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+
+# Verify LangSmith configuration
+print("🔍 LangSmith Configuration:")
+print(f"   LANGCHAIN_TRACING_V2: {os.getenv('LANGCHAIN_TRACING_V2')}")
+print(f"   LANGCHAIN_PROJECT: {os.getenv('LANGCHAIN_PROJECT')}")
+print(
+    f"   LANGSMITH_API_KEY: {'✅ Set' if os.getenv('LANGSMITH_API_KEY') else '❌ Missing'}"
+)
+
 
 # Map configuration
 ORIGIN_COORDS = (39.4699, -0.3763)  # Valencia, Spain
@@ -427,7 +446,7 @@ def process_emergency(actors_json: str):
             "",
             "",
             "",
-            "",  # ← NEW: reasoning
+            "",
             Folium(create_empty_map()),
             gr.update(choices=[], visible=False),
         )
@@ -441,7 +460,7 @@ def process_emergency(actors_json: str):
             "",
             "",
             "",
-            "",  # ← NEW: reasoning
+            "",
             Folium(create_empty_map()),
             gr.update(choices=[], visible=False),
         )
@@ -489,7 +508,7 @@ def process_emergency(actors_json: str):
         risk_text,
         route_text,
         plan_text,
-        reasoning_text,  # ← NEW: separate reasoning
+        reasoning_text,
         Folium(map_obj),
         gr.update(choices=all_ids, visible=True, value=None),
     )
@@ -641,7 +660,7 @@ def create_interface():
                 risk_output,
                 route_output,
                 plan_output,
-                reasoning_output,  # ← NEW OUTPUT
+                reasoning_output,
                 map_output,
                 zoom_dropdown,
             ],
@@ -664,7 +683,7 @@ def create_interface():
                 "",
                 "",
                 "",
-                "",  # ← NEW: reasoning output
+                "",
                 Folium(create_empty_map()),
                 gr.update(choices=[], visible=False),
             ),
@@ -674,7 +693,7 @@ def create_interface():
                 risk_output,
                 route_output,
                 plan_output,
-                reasoning_output,  # ← NEW OUTPUT
+                reasoning_output,
                 map_output,
                 zoom_dropdown,
             ],

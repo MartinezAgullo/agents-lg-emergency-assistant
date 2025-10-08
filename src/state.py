@@ -1,3 +1,5 @@
+# src/state.py
+
 from typing import Dict, List, Optional, TypedDict
 
 from pydantic import BaseModel, Field
@@ -84,7 +86,119 @@ class EvacuationPlan(BaseModel):
     plan_schematic: str = Field(
         description="Visual schematic summary of the plan with numbered steps, priorities, and timeline. Must be concise and easy to scan."
     )
-    reasoning: str
+    reasoning: str = Field(
+        description="Detailed reasoning explaining the plan's strategy, risk considerations, and decision-making process"
+    )
+
+
+# ==================== EVALUATION MODELS ====================
+
+
+class OperationalEvaluation(BaseModel):
+    """Evaluation focused on saving lives and minimizing losses"""
+
+    quality_score: float = Field(
+        description="Score 0.0-1.0 based on life-saving effectiveness (STRICT: 0.7+ to approve)"
+    )
+    feedback: str = Field(
+        description="Detailed feedback on operational feasibility and safety"
+    )
+    critical_gaps: List[str] = Field(
+        default_factory=list,
+        description="List of critical safety gaps that MUST be addressed",
+    )
+    acceptable_losses: List[str] = Field(
+        default_factory=list,
+        description="List of assets/areas where losses are acceptable if necessary to save higher-value targets",
+    )
+    approved: bool = Field(
+        description="True if plan meets minimum operational safety standards"
+    )
+
+
+class PoliticalCost(BaseModel):
+    """A single political cost item"""
+
+    issue: str = Field(description="The political issue or concern")
+    severity: str = Field(
+        description="Severity level: 'low', 'medium', 'high', or 'critical'"
+    )
+
+
+class SocialPoliticalEvaluation(BaseModel):
+    """Evaluation of social and political implications"""
+
+    quality_score: float = Field(
+        description="Score 0.0-1.0 based on political feasibility (LENIENT: 0.5+ to approve)"
+    )
+    feedback: str = Field(
+        description="Analysis of political risks and social implications"
+    )
+    political_costs: List[PoliticalCost] = Field(
+        default_factory=list,
+        description="List of political costs with their severity levels",
+    )
+    sovereignty_violations: List[str] = Field(
+        default_factory=list,
+        description="List of border/airspace/territorial violations",
+    )
+    public_perception_risks: List[str] = Field(
+        default_factory=list,
+        description="Issues that may cause panic, perceived favoritism, or inequality",
+    )
+    recommendations: List[str] = Field(
+        default_factory=list,
+        description="Suggestions to reduce political costs while maintaining effectiveness",
+    )
+    approved: bool = Field(
+        description="True if political costs are acceptable given the emergency"
+    )
+
+
+class EconomicEvaluation(BaseModel):
+    """Evaluation of economic feasibility and cost-effectiveness"""
+
+    quality_score: float = Field(
+        description="Score 0.0-1.0 based on cost-effectiveness (LENIENT: 0.5+ to approve)"
+    )
+    feedback: str = Field(
+        description="Analysis of costs, resource availability, and economic impact"
+    )
+    estimated_total_cost: str = Field(
+        description="Rough estimate of total cost (e.g., '$500K-1M', 'High', 'Moderate')"
+    )
+    resource_constraints: List[str] = Field(
+        default_factory=list,
+        description="List of potential resource shortages (fuel, vehicles, personnel)",
+    )
+    cost_benefit_analysis: str = Field(description="Brief cost vs. benefit assessment")
+    recommendations: List[str] = Field(
+        default_factory=list,
+        description="Suggestions to reduce costs while maintaining effectiveness",
+    )
+    approved: bool = Field(description="True if plan is economically feasible")
+
+
+class MetaEvaluation(BaseModel):
+    """Synthesized evaluation combining all three perspectives"""
+
+    overall_approved: bool = Field(
+        description="True only if ALL three evaluators approved"
+    )
+    overall_quality_score: float = Field(
+        description="Weighted average: Operational 50%, Social 30%, Economic 20%"
+    )
+    synthesized_feedback: str = Field(
+        description="Coherent, prioritized feedback combining insights from all evaluators. Start with most critical issues."
+    )
+    priority_improvements: List[str] = Field(
+        default_factory=list,
+        description="Numbered list of specific improvements ordered by importance",
+    )
+    conflicting_requirements: List[str] = Field(
+        default_factory=list,
+        description="Areas where evaluators have conflicting recommendations (if any)",
+    )
 
 
 class GraphState(TypedDict):
@@ -101,11 +215,18 @@ class GraphState(TypedDict):
 
     # Analysis
     risk_assessments: List[RiskAssessment]
-    route_details: Optional[List[dict]]  # NEW: Evacuation route information
+    route_details: Optional[List[dict]]
 
     # Planning
     proposed_plan: Optional[EvacuationPlan]
-    evaluation_feedback: Optional[str]
+
+    # Multi-Evaluation (NEW)
+    operational_evaluation: Optional[OperationalEvaluation]
+    social_evaluation: Optional[SocialPoliticalEvaluation]
+    economic_evaluation: Optional[EconomicEvaluation]
+    meta_evaluation: Optional[MetaEvaluation]
+
+    evaluation_feedback: Optional[str]  # Synthesized feedback for proposer
     retry_count: int
 
     # Output
