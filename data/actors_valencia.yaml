@@ -1,0 +1,365 @@
+assets:
+- id: hospital_la_fe_valencia
+  type: HOSPITAL
+  location:
+    lat: 39.4434289
+    lon: -0.3760404
+  comments: "Hospital Universitari i Politècnic La Fe — centro de referencia regional; atención masiva durante las inundaciones."
+  severity: high
+  timestamp: "2024-10-30T03:00:00Z"
+  source: "Open data / Hospital directories"
+  tags:
+  - hospital
+  - tertiary
+  - reference
+
+- id: hospital_clinico_valencia
+  type: HOSPITAL
+  location:
+    lat: 39.478987230480136
+    lon: -0.361953991490622
+  comments: "Hospital Clínico Universitario de València. Recepción de pacientes y operaciones de emergencia."
+  severity: high
+  timestamp: "2024-10-30T04:30:00Z"
+  source: "Open data / municipal"
+  tags:
+  - hospital
+  - university
+
+- id: hospital_peset_valencia
+  type: HOSPITAL
+  location:
+    lat: 39.4526667
+    lon: -0.39375
+  comments: "Hospital Universitari Doctor Peset (Patraix). Afectado por cortes de acceso en vías secundarias."
+  severity: high
+  timestamp: "2024-10-30T05:00:00Z"
+  source: "Open data / maps"
+  tags:
+  - hospital
+  - regional
+
+- id: hospital_quiron_valencia
+  type: HOSPITAL
+  location:
+    lat: 39.47802
+    lon: -0.36418
+  comments: "Hospital Quirónsalud (Av. Blasco Ibáñez). Apoyo logístico y atención privada."
+  severity: medium
+  timestamp: "2024-10-30T06:00:00Z"
+  source: "Quirónsalud / maps"
+  tags:
+  - hospital
+  - private
+
+- id: hospital_general_valencia
+  type: HOSPITAL
+  location:
+    lat: 39.46838
+    lon: -0.40837
+  comments: "Hospital General Universitari de València (Olivereta). Saturación en urgencias durante el evento."
+  severity: high
+  timestamp: "2024-10-30T05:30:00Z"
+  source: "OpenStreetMap / wikidata"
+  tags:
+  - hospital
+  - general
+
+- id: fire_bomberos_central_valencia
+  type: FIREMEN
+  location:
+    lat: 39.48993
+    lon: -0.37793
+  comments: "Parque central de bomberos - coordinación de rescates y desinundación."
+  severity: high
+  timestamp: "2024-10-29T23:30:00Z"
+  source: "Consorci Provincial de Bombers / directorio"
+  tags:
+  - fire
+  - rescue
+  - central
+
+- id: fire_bomberos_paterna
+  type: FIREMEN
+  location:
+    lat: 39.50206
+    lon: -0.44060
+  comments: "Parque de Bomberos de Paterna. Apoyo logístico para Horta Norte/Sud."
+  severity: high
+  timestamp: "2024-10-30T00:45:00Z"
+  source: "Consorci Bomberos"
+  tags:
+  - fire
+  - support
+
+- id: fire_bomberos_moncada
+  type: FIREMEN
+  location:
+    lat: 39.56972
+    lon: -0.40255
+  comments: "Estación auxiliar en Moncada - cobertura suplementaria."
+  severity: medium
+  timestamp: "2024-10-30T04:00:00Z"
+  source: "Consorci Bomberos"
+  tags:
+  - fire
+  - auxiliary
+
+- id: police_local_central_valencia
+  type: POLICE
+  location:
+    lat: 39.4768
+    lon: -0.3764
+  comments: "Comisaría central Policía Local: gestión de tráfico, desvíos y avisos a la población."
+  severity: high
+  timestamp: "2024-10-29T22:00:00Z"
+  source: "Ajuntament / directorio"
+  tags:
+  - police
+  - traffic
+
+- id: military_betera_area
+  type: MILITARY
+  location:
+    lat: 39.6400
+    lon: -0.4890
+  comments: "Base/instalaciones militares (área aproximada Bétera). Apoyo logístico y de recursos."
+  severity: medium
+  timestamp: "2024-10-30T07:00:00Z"
+  source: "Ministerio de Defensa (ubicación aproximada)"
+  tags:
+  - military
+  - logistics
+
+- id: cct_ambulance_central_valencia
+  type: CCT_AMBULANCE
+  location:
+    lat: 39.4550
+    lon: -0.3630
+  comments: "Base central de ambulancias / SAMU - despliegues para emergencias sanitarias."
+  severity: high
+  timestamp: "2024-10-30T02:30:00Z"
+  source: "Servicios de Salud / estimado"
+  tags:
+  - ambulance
+  - ems
+
+- id: data_center_valencia_approx_1
+  type: DATA_CENTER
+  location:
+    lat: 39.4810
+    lon: -0.3810
+  comments: "Centro de datos (ubicación aproximada). Priorizar suministro eléctrico y accesos."
+  severity: high
+  timestamp: "2024-10-30T03:30:00Z"
+  source: "Inferred / map area (placeholder)"
+  tags:
+  - data_center
+  - infrastructure
+
+- id: energy_substation_valencia_1
+  type: ENERGY_PLANT
+  location:
+    lat: 39.4500
+    lon: -0.3600
+  comments: "Subestación eléctrica (aprox.) — prioridad para restablecimiento en hospitales y albergues."
+  severity: high
+  timestamp: "2024-10-30T03:45:00Z"
+  source: "Inferred / operational priority"
+  tags:
+  - power
+  - substation
+
+- id: evac_albufera
+  type: EVACUATION_ZONE
+  location:
+    lat: 39.338802
+    lon: -0.344756
+  comments: "Parc Natural de l'Albufera — área de evacuación para núcleos rurales y playas; afectada por arrastres y contaminación."
+  severity: high
+  timestamp: "2024-11-01T08:00:00Z"
+  source: "Parc Natural / regional reports"
+  tags:
+  - evacuation
+  - wetland
+  - environment
+
+- id: evac_torrent
+  type: EVACUATION_ZONE
+  location:
+    lat: 39.4370
+    lon: -0.4724
+  comments: "Torrent (Horta Sud) — municipio con barrios afectados por ramblas y avenidas; punto prioritario para albergues."
+  severity: high
+  timestamp: "2024-10-30T01:00:00Z"
+  source: "Municipal coords / Horta Sud"
+  tags:
+  - horta_sud
+  - municipality
+
+- id: evac_catarroja
+  type: EVACUATION_ZONE
+  location:
+    lat: 39.4039
+    lon: -0.4035
+  comments: "Catarroja — zonas ribereñas y conexiones con acequias; riesgo por desbordes."
+  severity: high
+  timestamp: "2024-10-30T01:20:00Z"
+  source: "Municipal coords"
+  tags:
+  - horta_sud
+
+- id: evac_alfafar
+  type: EVACUATION_ZONE
+  location:
+    lat: 39.4232324
+    lon: -0.3898719
+  comments: "Alfafar — zonas urbanas e industriales con canalizaciones saturadas."
+  severity: medium
+  timestamp: "2024-10-30T01:40:00Z"
+  source: "Municipal coords"
+  tags:
+  - horta_sud
+  - industrial
+
+- id: evac_albal
+  type: EVACUATION_ZONE
+  location:
+    lat: 39.3970929
+    lon: -0.4121969
+  comments: "Albal — zonas bajas susceptibles a anegamiento y cortes de acceso."
+  severity: medium
+  timestamp: "2024-10-30T02:00:00Z"
+  source: "Municipal coords"
+  tags:
+  - horta_sud
+
+- id: evac_silla
+  type: EVACUATION_ZONE
+  location:
+    lat: 39.36111
+    lon: -0.41139
+  comments: "Silla — proximidad a acequias y canales agrícolas; riesgo para cultivos y accesos."
+  severity: high
+  timestamp: "2024-10-30T02:15:00Z"
+  source: "Municipal coords / agricultural reports"
+  tags:
+  - horta_sud
+  - agriculture
+
+- id: evac_paiporta
+  type: EVACUATION_ZONE
+  location:
+    lat: 39.4284465
+    lon: -0.4188691
+  comments: "Paiporta — punto a considerar para albergues temporales si rutas hacia Valencia quedan cortadas."
+  severity: medium
+  timestamp: "2024-10-30T02:30:00Z"
+  source: "Municipal coords"
+  tags:
+  - horta_sud
+
+- id: evac_sedavi
+  type: EVACUATION_ZONE
+  location:
+    lat: 39.425
+    lon: -0.383786
+  comments: "Sedaví — zonas bajas con riesgo de inundación rápida."
+  severity: medium
+  timestamp: "2024-10-30T02:45:00Z"
+  source: "Municipal coords"
+  tags:
+  - horta_sud
+
+- id: evac_picassent
+  type: EVACUATION_ZONE
+  location:
+    lat: 39.3637987
+    lon: -0.4620313
+  comments: "Picassent — accesos por carreteras secundarias que pueden quedar incomunicados."
+  severity: low
+  timestamp: "2024-10-30T03:00:00Z"
+  source: "Municipal coords"
+  tags:
+  - horta_sud
+
+dangers:
+- id: flood_albufera_2024
+  type: FLOOD
+  location:
+    lat: 39.338802
+    lon: -0.344756
+  comments: "Desbordes y arrastres en l'Albufera; contaminación por sedimentos y vehículos arrastrados."
+  severity: high
+  timestamp: "2024-10-30T06:00:00Z"
+  source: "Meteorological reports / news"
+  tags:
+  - flood
+  - albufera
+  - environment
+
+- id: flood_horta_sud_2024
+  type: FLOOD
+  location:
+    lat: 39.420000
+    lon: -0.410000
+  comments: "Inundaciones generalizadas en Horta Sud: ramblas y acequias desbordadas, barrios anegados."
+  severity: high
+  timestamp: "2024-10-30T05:00:00Z"
+  source: "Municipal reports / news"
+  tags:
+  - flood
+  - horta_sud
+
+- id: flood_torrent_2024
+  type: FLOOD
+  location:
+    lat: 39.4370
+    lon: -0.4724
+  comments: "Torrent: desbordes de ramblas, evacuaciones y necesidad de albergues."
+  severity: high
+  timestamp: "2024-10-30T01:00:00Z"
+  source: "Municipal reports"
+  tags:
+  - flood
+  - torrent
+
+- id: flood_catarroja_2024
+  type: FLOOD
+  location:
+    lat: 39.4039
+    lon: -0.4035
+  comments: "Catarroja y zonas ribereñas con riesgo por desbordes y sedimentos."
+  severity: high
+  timestamp: "2024-10-30T01:20:00Z"
+  source: "Municipal reports"
+  tags:
+  - flood
+  - catarroja
+
+- id: heavy_storm_valencia_2024
+  type: HEAVY_STORM
+  location:
+    lat: 39.466667
+    lon: -0.375000
+  comments: "Tormentas intensas asociadas a la DANA que incrementaron escorrentía y erosión."
+  severity: high
+  timestamp: "2024-10-29T22:00:00Z"
+  source: "AEMET / meteorological analyses"
+  tags:
+  - storm
+  - dana
+  - heavy_rain
+
+- id: heavy_storm_south_coast_2024
+  type: HEAVY_STORM
+  location:
+    lat: 39.3500
+    lon: -0.3600
+  comments: "Tormentas costeras con viento y lluvia intensa, agravando la situación en l'Albufera y zonas bajas."
+  severity: medium
+  timestamp: "2024-10-30T04:30:00Z"
+  source: "Meteorological reports / news"
+  tags:
+  - storm
+  - coastal

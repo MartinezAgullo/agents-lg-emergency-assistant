@@ -9,10 +9,10 @@ Usage:
     python test_graph.py
 """
 
-import json
 import os
 from pathlib import Path
 
+import yaml
 from dotenv import load_dotenv
 from langgraph.checkpoint.sqlite import SqliteSaver
 
@@ -27,10 +27,10 @@ os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "emergency-assistant-test"
 
 
-def load_actors_data(filepath: str = "data/actors.json") -> dict:
-    """Load actors data from JSON file"""
-    with open(filepath, "r") as f:
-        return json.load(f)
+def load_actors_data(filepath: str = "data/actors_valencia.yaml") -> dict:
+    """Load actors data from YAML file"""
+    with open(filepath, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 
 def print_section(title: str):

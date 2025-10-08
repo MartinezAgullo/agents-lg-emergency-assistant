@@ -47,7 +47,8 @@ Proposed project scaffolding
 /emergency_assistant
 ├── checkpoints
 ├── data
-│   └── actors.json
+│   ├── actors_japan.yaml
+│   └── actors_valencia.yaml
 ├── main.py
 ├── pyproject.toml
 ├── src
@@ -58,12 +59,25 @@ Proposed project scaffolding
 │   │   ├── evaluator.py
 │   │   ├── notifier.py
 │   │   ├── parser.py
-│   │   └── proposer.py
+│   │   ├── proposer.py
+│   │   └── route_analyzer.py
 │   ├── state.py
 │   └── tools.py
-├── test_firewall.py
-└── test_graph.py
+└── tests
+    ├── test_firewall.py
+    ├── test_graph.py
+    └── test_yaml.py
 ```
+## Interface
+    <figure style="margin: 0;">
+        <img src="https://github.com/MartinezAgullo/agents-lg-emergency-assistant/blob/main/data/gradio_0_empty.png" alt="Gradio interface" style="width: 100%; max-width: 400px; display: block;">
+    </figure>
+
+The evacuation routes are displayed as well
+    <figure style="margin: 0;">
+        <img src="https://github.com/MartinezAgullo/agents-lg-emergency-assistant/blob/main/data/gradio_a_maps.png" alt="Gradio interface" style="width: 100%; max-width: 400px; display: block;">
+    </figure>
+
 
 ## 📝 License
 
