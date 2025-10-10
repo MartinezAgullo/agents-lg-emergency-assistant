@@ -4,18 +4,18 @@ An AI-powered agentic system for intelligent decision-making in emergency scenar
 
 ## 🎯 Overview
 
-Emergency Assistant analyzes threats (fires, storms, terrorist attacks) and automatically generates evacuation plans for critical assets (data centers, energy plants, radar stations). The system uses a multi-agent approach with an **Evaluator-Optimizer pattern** to ensure high-quality emergency response plans.
+Emergency Assistant analyzes threats (fires, storms, terrorist attacks), and automatically generates evacuation plans for critical assets (data centers, energy plants, radar stations). The system uses a multi-agent approach with an **Evaluator-Optimizer pattern** to ensure high-quality emergency response plans.
 
 ## ✨ Key Features
 
 - 🤖 **Multi-Agent Architecture**: Parser → Analyzer → Proposer → Evaluator workflow
 - 📍 **Geospatial Risk Assessment**: Calculates threat proximity and risk levels for each asset
-- 🔄 **Self-Improving Plans**: Iterative plan refinement until quality threshold is met:
-   - Several sub evaluators specialists.
+- 🔄 **Self-Improving Plans**: Iterative plan refinement until quality threshold is met
+   - Several sub evaluators specialists
 - 📲 **Push Notifications**: Real-time alerts via [Pushover](https://pushover.net/)
 - 💾 **Persistent Checkpoints**: SQLite-based state management for reliability
 - 📊 **Full Observability**: Integrated LangSmith tracing
-- 🧱 **LLM Injection Firewall**: Protects against malicious external promptss
+- 🧱 **LLM Injection Firewall**: Protects against malicious external prompts
 <!-- - 🎨 **Interactive UI**: Gradio interface with map visualization -->
 
 ## 🏗️ Architecture
@@ -40,7 +40,7 @@ Emergency Assistant analyzes threats (fires, storms, terrorist attacks) and auto
               │                 Proposer               │
               │     (generates an initial or revised plan) │
               └────────────────────────────────────────┘
-                                   │
+                                  │
              ┌────────────────────┴────────────────────┐
              │                   │                     │
              ▼                   ▼                     ▼
@@ -56,7 +56,7 @@ Emergency Assistant analyzes threats (fires, storms, terrorist attacks) and auto
               │             Meta_Evaluator             │
               │  (synthesis of the three evaluations)  │
               └────────────────────────────────────────┘
-                                   │
+                                  │
                          ┌────────┴────────┐
                          ▼                 ▼
         ┌────────────────────────┐  ┌────────────────────────┐
@@ -95,22 +95,25 @@ Proposed project scaffolding
 │   └── actors_valencia.yaml
 ├── main.py
 ├── pyproject.toml
-└── src
-    ├── config.py
-    ├── firewall.py
-    ├── graph.py
-    ├── nodes
-    │   ├── analyzer.py
-    │   ├── evaluator_economic.py
-    │   ├── evaluator_meta.py
-    │   ├── evaluator_operational.py
-    │   ├── evaluator_social.py
-    │   ├── notifier.py
-    │   ├── parser.py
-    │   ├── proposer.py
-    │   └── route_analyzer.py
-    ├── state.py
-    └── tools.py
+├── src
+│   ├── config.py
+│   ├── firewall.py
+│   ├── graph.py
+│   ├── nodes
+│   │   ├── analyzer.py
+│   │   ├── evaluator_economic.py
+│   │   ├── evaluator_meta.py
+│   │   ├── evaluator_operational.py
+│   │   ├── evaluator_politic.py
+│   │   ├── notifier.py
+│   │   ├── parser.py
+│   │   ├── proposer.py
+│   │   └── route_analyzer.py
+│   ├── state.py
+│   └── tools.py
+└── tests
+    ├── test_firewall.py
+    ├── test_graph.py
     └── test_yaml.py
 ```
 ## Interface

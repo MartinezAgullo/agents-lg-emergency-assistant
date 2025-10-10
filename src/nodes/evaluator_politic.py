@@ -1,4 +1,4 @@
-# src/nodes/evaluator_social.py
+# src/nodes/evaluator_politic.py
 
 import os
 from typing import Any, Dict

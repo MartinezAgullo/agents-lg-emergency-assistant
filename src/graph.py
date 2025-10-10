@@ -10,7 +10,7 @@ from .nodes.analyzer import analyze_risks
 from .nodes.evaluator_economic import evaluate_economic
 from .nodes.evaluator_meta import evaluate_meta
 from .nodes.evaluator_operational import evaluate_operational
-from .nodes.evaluator_social import evaluate_social
+from .nodes.evaluator_politic import evaluate_social
 from .nodes.notifier import send_notifications
 from .nodes.parser import parse_input
 from .nodes.proposer import propose_plan
@@ -71,7 +71,7 @@ def create_emergency_graph() -> StateGraph:
 
     # Three parallel evaluators
     graph_builder.add_node("evaluator_operational", evaluate_operational)
-    graph_builder.add_node("evaluator_social", evaluate_social)
+    graph_builder.add_node("evaluator_politic", evaluate_social)
     graph_builder.add_node("evaluator_economic", evaluate_economic)
 
     # Meta-evaluator synthesizes results
@@ -86,12 +86,12 @@ def create_emergency_graph() -> StateGraph:
 
     # Parallel evaluation: proposer → three evaluators
     graph_builder.add_edge("proposer", "evaluator_operational")
-    graph_builder.add_edge("proposer", "evaluator_social")
+    graph_builder.add_edge("proposer", "evaluator_politic")
     graph_builder.add_edge("proposer", "evaluator_economic")
 
     # All three evaluators → meta-evaluator
     graph_builder.add_edge("evaluator_operational", "evaluator_meta")
-    graph_builder.add_edge("evaluator_social", "evaluator_meta")
+    graph_builder.add_edge("evaluator_politic", "evaluator_meta")
     graph_builder.add_edge("evaluator_economic", "evaluator_meta")
 
     # Conditional edge: after meta-evaluator
